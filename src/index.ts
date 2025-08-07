@@ -2,6 +2,7 @@ import sqlite3 from "sqlite3";
 import { Uma } from "./models/uma";
 import { Career } from "./career";
 import * as readline from "readline";
+import { MenuSystem } from "./utils/menu-system";
 
 console.log("Hello Uma Musume Simulator!");
 
@@ -44,6 +45,8 @@ function simulateCareer(uma: Uma): void {
 		output: process.stdout,
 	});
 
+	const menuSystem = new MenuSystem(career, rl);
+
 	const gameLoop = (): void => {
 		if (career.isComplete) {
 			console.log("\nCareer simulation complete!");
@@ -51,45 +54,19 @@ function simulateCareer(uma: Uma): void {
 			return;
 		}
 
-		displayMenu(career);
+		menuSystem.displayCurrentMenu();
 
-		rl.question("\nSelect an action (0-5): ", (input) => {
-			const choice = parseInt(input);
-			const actions = career.AvailableActions;
+		rl.question("\nSelect an action: ", (input) => {
+			const shouldContinue = menuSystem.handleInput(input)
 
-			if (choice === 0) {
-				console.log("Goodbye!");
-				rl.close();
-				return;
-			}
-
-			if (choice >= 1 && choice <= actions.length) {
-				const selectedAction = actions[choice - 1];
-				career.executeAction(selectedAction);
+			if (shouldContinue) {
+				gameLoop();
 			} else {
-				console.log("Invalid choice. Please try again.");
+				rl.close();
 			}
-			gameLoop();
 		});
 	};
 	gameLoop();
-}
-
-function displayMenu(career: Career): void {
-	const state = career.State;
-	const actions = career.AvailableActions;
-
-	console.log("\n=== Uma Musume Career Simulator ===");
-	console.log(`Turn: ${state.turn}`);
-	console.log(`Energy: ${state.energy}`);
-	console.log(`Trainee: ${state.uma.name}`);
-	console.log("\nAvailable Actions:");
-
-	actions.forEach((action, index) => {
-		console.log(`${index + 1}. ${action.toUpperCase()}`);
-	});
-
-	console.log("0. Quit");
 }
 
 async function main(): Promise<void> {

@@ -1,0 +1,7 @@
+export enum TrainingType {
+    SPEED = 'speed',
+    STAMINA = 'stamina', 
+    STRENGTH = 'strength',
+    GUTS = 'guts',
+    WISDOM = 'wisdom'
+}
