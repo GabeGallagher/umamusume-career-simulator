@@ -11,23 +11,29 @@ interface CharacterRow {
 }
 
 async function loadUmaFromDb(): Promise<Uma> {
-	const db = new sqlite3.Database("characters.db");
-	let sql = "SELECT id, data FROM characters LIMIT 1";
+    return new Promise((resolve, reject) => {
+        const db = new sqlite3.Database("characters.db");
+        let sql = "SELECT id, data FROM characters LIMIT 1";
 
-	const charData: any = await new Promise((resolve, reject) => {
-		db.get(sql, [], (err, row: CharacterRow) => {
-			if (err) {
-				console.error(`Database query failed: ${err.message}`);
-				reject(err);
-			} else {
-				const characterData = JSON.parse(row.data);
-				resolve(characterData);
-			}
-		});
-	});
-	
-	const uma = new Uma(charData.itemData);
-	return uma;
+        db.get(sql, [], (err, row: CharacterRow) => {
+            if (err) {
+                console.error(`Database query failed: ${err.message}`);
+                db.close();
+                reject(err);
+            } else {
+                try {
+                    const characterData = JSON.parse(row.data);
+                    const uma = new Uma(characterData.itemData);
+                    db.close(() => {
+                        resolve(uma);
+                    });
+                } catch (parseError) {
+                    db.close();
+                    reject(parseError);
+                }
+            }
+        });
+    });
 }
 
 function simulateCareer(uma: Uma): void {
