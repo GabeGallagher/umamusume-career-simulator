@@ -1,0 +1,29 @@
+{
+  "name": "umamusume-career-simulator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "career-test": "ts-node src/career-test.ts",
+    "test-readline": "ts-node src/test-readline.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/cheerio": "^0.22.35",
+    "@types/node": "^24.2.0",
+    "@types/puppeteer": "^5.4.7",
+    "cheerio": "^1.1.2",
+    "puppeteer": "^24.15.0",
+    "sqlite3": "^5.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "description": ""
+}
