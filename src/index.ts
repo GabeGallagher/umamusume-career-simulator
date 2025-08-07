@@ -10,7 +10,7 @@ interface CharacterRow {
 	data: string;
 }
 
-async function fixedLoadCharacterFromDB(): Promise<Uma> {
+async function loadUmaFromDb(): Promise<Uma> {
 	const db = new sqlite3.Database("characters.db");
 	let sql = "SELECT id, data FROM characters LIMIT 1";
 
@@ -25,6 +25,7 @@ async function fixedLoadCharacterFromDB(): Promise<Uma> {
 			}
 		});
 	});
+	
 	const uma = new Uma(charData.itemData);
 	return uma;
 }
@@ -86,7 +87,7 @@ function displayMenu(career: Career): void {
 }
 
 async function main(): Promise<void> {
-	const uma = await fixedLoadCharacterFromDB();
+	const uma = await loadUmaFromDb();
 	simulateCareer(uma);
 }
 
