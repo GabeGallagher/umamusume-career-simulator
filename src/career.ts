@@ -79,6 +79,7 @@ export class Career {
 		console.log(
 			`Turn ${this.state.turn}: Resting (${addedEnergy}, now ${this.state.energy})`
 		);
+		// TODO: add option for summer camp, rest recovers 40 energy and adds 1 to mood
 	}
 
 	private handleEnergyRoll(roll: number) {
@@ -99,6 +100,7 @@ export class Career {
 			`Turn ${this.state.turn}: Training (-20 energy, now ${this.state.energy})`
 		);
 		// TODO: Add stat gains and training effects
+		// TODO: I discovered the when a facility levels up, the facility applies the stat increases, then levels up the facility if it has 4 trainings, then subtracts the energy
 	}
 
 	private handleSkills(): void {
@@ -149,7 +151,10 @@ export class Career {
 	// Rolls to see if you get claw game. Assumes you win a 1 mood boost
 	private rollForClawGame(): void {
 		const roll = Math.floor(Math.random() * 4);
-		if (roll === 0) this.changeMood(1);
+		if (roll === 0) {
+			this.changeMood(1);
+			this.addEnergy(10);
+		}
 	}
 
 	private changeMood(amount: number): void {
