@@ -154,6 +154,7 @@ export class Career {
 		if (roll === 0) {
 			this.changeMood(1);
 			this.addEnergy(10);
+			// TODO: Add hint for straightaway recovery
 		}
 	}
 
