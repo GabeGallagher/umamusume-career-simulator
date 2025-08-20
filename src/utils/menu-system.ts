@@ -4,16 +4,23 @@ import { Career, CareerAction } from "../career";
 export enum MenuType {
 	MAIN = "main",
 	TRAINING = "training",
+	SKILLS = 'skills',
+	RACES = 'races',
 }
 
 export class MenuSystem {
 	private rl: readline.Interface;
 	private career: Career;
 	private currentMenu: MenuType = MenuType.MAIN;
+	private prevMenu: MenuType = MenuType.MAIN;
 
 	constructor(career: Career, rl: readline.Interface) {
 		this.career = career;
 		this.rl = rl;
+	}
+
+	get PreviousMenu(): MenuType {
+		return this.prevMenu;
 	}
 
 	displayCurrentMenu(): void {
@@ -32,8 +39,19 @@ export class MenuSystem {
 	}
 
 	private displayMainMenu(): void {
-		const state = this.career.State;
+		this.displayStateInfo();
 		const actions = this.career.AvailableActions;
+		console.log("\nAvailable Actions:");
+
+		actions.forEach((action, index) => {
+			console.log(`${index + 1}. ${action.toUpperCase()}`);
+		});
+
+		console.log("0. Quit");
+	}
+
+	private displayStateInfo(): void {
+		const state = this.career.State;
 
 		console.log(`Turn: ${state.turn}`);
 		console.log(`Energy: ${state.energy}`);
@@ -44,13 +62,6 @@ export class MenuSystem {
 		console.log(`    Power: ${state.uma.current_stats.strength}`);
 		console.log(`    Guts: ${state.uma.current_stats.guts}`);
 		console.log(`    Wisdom: ${state.uma.current_stats.wisdom}`);
-		console.log("\nAvailable Actions:");
-
-		actions.forEach((action, index) => {
-			console.log(`${index + 1}. ${action.toUpperCase()}`);
-		});
-
-		console.log("0. Quit");
 	}
 
     handleMainMenuInput(choice: number): boolean {
@@ -78,7 +89,15 @@ export class MenuSystem {
     }
 
 	private displayTrainingMenu(): void {
-		"place holder training menu";
+		this.displayStateInfo();
+		const actions = this.career.AvailableActions;
+		console.log("\nAvailable Actions:");
+
+		actions.forEach((action, index) => {
+			console.log(`${index + 1}. ${action.toUpperCase()}`);
+		});
+
+		console.log("0. Back");
 	}
 
     handleInput(input: string): boolean {

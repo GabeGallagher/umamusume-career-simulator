@@ -1,6 +1,9 @@
 import { Condition } from "./enums/condition";
 import { Recreation } from "./enums/recreation";
 import { Uma } from "./models/uma";
+import { MenuSystem } from "./utils/menu-system";
+import { TrainingAction } from "./interfaces/training-action";
+import { Training } from "./training";
 
 export enum CareerAction {
 	REST = "rest",
@@ -20,6 +23,7 @@ export interface CareerState {
 export class Career {
 	private state: CareerState;
 	private maxTurns: number = 72;
+	private training: Training;
 
 	constructor(uma: Uma) {
 		this.state = {
@@ -28,13 +32,15 @@ export class Career {
 			uma: uma,
 			isComplete: false,
 		};
+
+		this.training = new Training(uma);
 	}
 
 	get State(): CareerState {
 		return { ...this.state };
 	}
 
-	get AvailableActions(): CareerAction[] {
+	get AvailableActions(): (CareerAction | TrainingAction)[] {
 		return [
 			CareerAction.REST,
 			CareerAction.TRAINING,
@@ -44,11 +50,40 @@ export class Career {
 		];
 	}
 
-	executeAction(action: CareerAction): void {
+	executeAction(action: CareerAction | TrainingAction): void {
 		if (this.state.isComplete) {
 			throw new Error("Career is already complete");
 		}
 
+		if (Object.values(CareerAction).includes(action as CareerAction))
+			this.handleCareerAction(action as CareerAction);
+		else if (Object.values(TrainingAction).includes(action as TrainingAction))
+			this.handleTrainingAction(action as TrainingAction);
+		else {
+			console.error(`Unknown action type: ${action}`);
+			return;
+		}
+
+
+		this.advanceTurn();
+	}
+
+	private handleTrainingAction(action: TrainingAction): void {
+		if (action === TrainingAction.BACK)
+			this.trainingBack();
+		else
+			this.trainStat(action);
+	}
+
+	private trainingBack(): void {
+		
+	}
+	
+	private trainStat(action: TrainingAction): void {
+
+	}
+
+	private handleCareerAction(action: CareerAction): void {
 		switch (action) {
 			case CareerAction.REST:
 				this.handleRest();
@@ -66,8 +101,6 @@ export class Career {
 				this.handleRaces();
 				break;
 		}
-
-		this.advanceTurn();
 	}
 
 	private handleRest(): void {
