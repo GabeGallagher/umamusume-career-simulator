@@ -64,7 +64,6 @@ export class Career {
 	}
 
 	private handleTrainingAction(action: TrainingAction): void {
-		console.log("Handling Training Action");
 		if (action === TrainingAction.BACK) this.trainingBack();
 		else this.training.train(action);
 	}
@@ -95,7 +94,7 @@ export class Career {
 	}
 
 	private handleRest(): void {
-		const addedEnergy = this.handleEnergyRoll(Math.random() * 100);
+		const addedEnergy: number = this.handleEnergyRoll(Math.random() * 100);
 		this.state.energy = Math.min(
 			this.state.uma.MaxEnergy,
 			this.state.energy + addedEnergy
@@ -106,9 +105,9 @@ export class Career {
 		// TODO: add option for summer camp, rest recovers 40 energy and adds 1 to mood
 	}
 
-	private handleEnergyRoll(roll: number) {
+	private handleEnergyRoll(roll: number): number {
 		if (roll <= 12.5) {
-			const intRoll = Math.floor(Math.random() * 5);
+			const intRoll: number = Math.floor(Math.random() * 5);
 			if (intRoll === 0) this.state.uma.addCondition(Condition.NIGHT_OWL);
 			return 30;
 		} else if (roll > 12.5 && roll <= 65) {
@@ -172,9 +171,9 @@ export class Career {
 		}
 	}
 
-	// Rolls to see if you get claw game. Assumes you win a 1 mood boost
+	// Rolls to see if you get claw game. Assumes you win a 1 mood boost since this is the statistical average
 	private rollForClawGame(): void {
-		const roll = Math.floor(Math.random() * 4);
+		const roll: number = Math.floor(Math.random() * 4);
 		if (roll === 0) {
 			this.changeMood(1);
 			this.addEnergy(10);
@@ -182,8 +181,8 @@ export class Career {
 		}
 	}
 
-	private changeMood(amount: number): void {
-		this.state.uma.Mood = amount;
+	private changeMood(moodChangeAmount: number): void {
+		this.state.uma.setMood(moodChangeAmount);
 	}
 
 	private addEnergy(addedEnergy: number): void {

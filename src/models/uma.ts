@@ -67,7 +67,7 @@ export class Uma implements UmaInterface {
         return this.mood;
     }
 
-    set Mood(moodChange: number) {
+    public setMood(moodChange: number): void {
         const newMoodValue = this.mood + moodChange;
         const clampedMoodValue = Math.max(0, Math.min(Mood.Great, newMoodValue));
         this.mood = clampedMoodValue as Mood;
