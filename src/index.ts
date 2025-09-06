@@ -13,10 +13,10 @@ interface CharacterRow {
 
 async function loadUmaFromDb(): Promise<Uma> {
     return new Promise((resolve, reject) => {
-        const db = new sqlite3.Database("characters.db");
-        let sql = "SELECT id, data FROM characters LIMIT 1";
+        const db: sqlite3.Database = new sqlite3.Database("characters.db");
+        const sql: string = "SELECT id, data FROM characters LIMIT 1";
 
-        db.get(sql, [], (err, row: CharacterRow) => {
+        db.get(sql, [], (err: Error | null, row: CharacterRow) => {
             if (err) {
                 console.error(`Database query failed: ${err.message}`);
                 db.close();
@@ -24,7 +24,7 @@ async function loadUmaFromDb(): Promise<Uma> {
             } else {
                 try {
                     const characterData = JSON.parse(row.data);
-                    const uma = new Uma(characterData.itemData);
+                    const uma: Uma = new Uma(characterData.itemData);
                     db.close(() => {
                         resolve(uma);
                     });
@@ -38,14 +38,14 @@ async function loadUmaFromDb(): Promise<Uma> {
 }
 
 function simulateCareer(uma: Uma): void {
-	const career = new Career(uma);
+	const career: Career = new Career(uma);
 
-	const rl = readline.createInterface({
+	const rl: readline.Interface = readline.createInterface({
 		input: process.stdin,
 		output: process.stdout,
 	});
 
-	const menuSystem = new MenuSystem(career);
+	const menuSystem: MenuSystem = new MenuSystem(career);
 
 	const gameLoop = (): void => {
 		if (career.isComplete) {
@@ -57,7 +57,7 @@ function simulateCareer(uma: Uma): void {
 		menuSystem.displayMenu();
 
 		rl.question("\nSelect an action: ", (input) => {
-			const shouldContinue = menuSystem.handleInput(input)
+			const shouldContinue: boolean = menuSystem.handleInput(input)
 
 			if (shouldContinue) {
 				gameLoop();
@@ -70,7 +70,7 @@ function simulateCareer(uma: Uma): void {
 }
 
 async function main(): Promise<void> {
-	const uma = await loadUmaFromDb();
+	const uma: Uma = await loadUmaFromDb();
 	simulateCareer(uma);
 }
 
