@@ -1,10 +1,10 @@
 export interface MenuAction {
-    label: string;
-    value: string;
-    isBack?: boolean;
-    isQuit?: boolean;
+	action: string;
+	value: number;
+	isBack?: boolean;
+	isQuit?: boolean;
 }
 
 export interface ActionProvider {
-    getAvailableActions(): MenuAction[];
+	getAvailableActions(): MenuAction[];
 }

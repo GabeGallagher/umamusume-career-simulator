@@ -23,8 +23,13 @@ export class MenuSystem {
 		this.rl = rl;
 		this.actionProviders = new Map([
 			[MenuType.MAIN, new MainMenuActions()],
-			[MenuType.TRAINING, new TrainingActions(career.Training)],
+			[MenuType.TRAINING, new TrainingActions()],
 		]);
+	}
+
+	set CurrentMenu(menu: MenuType) {
+		this.prevMenu = this.currentMenu;
+		this.currentMenu = menu;
 	}
 
 	get PreviousMenu(): MenuType {
@@ -41,7 +46,7 @@ export class MenuSystem {
 		console.log("\nAvailable Actions:");
 
 		this.AvailableActions.forEach((action, index) => {
-			console.log(`${index + 1}. ${action.label}`);
+			console.log(`${index}. ${action.action}`);
 		});
 	}
 
@@ -59,39 +64,30 @@ export class MenuSystem {
 		console.log(`    Wisdom: ${state.uma.current_stats.wisdom}`);
 	}
 
-	handleMainMenuInput(choice: number): boolean {
-		const actions = this.AvailableActions;
-
-		if (choice === 0) {
+	handleInput(input: string): boolean {
+		const choice = parseInt(input);
+		const isQuitAction = this.AvailableActions.find(
+			(action) => action.isQuit
+		);
+		if (choice === 0 && isQuitAction) {
 			console.log("Goodbye!");
 			return false;
 		}
 
-		if (choice >= 1 && choice <= actions.length) {
-			const selectedAction: MenuAction = actions[choice - 1];
+		if (choice < this.AvailableActions.length) {
+			const selectedAction: MenuAction =
+				this.AvailableActions[choice];
 
-			if (selectedAction.value === CareerAction.TRAINING) {
-				this.currentMenu = MenuType.TRAINING;
+			if (selectedAction.action === CareerAction.TRAINING) {
+				this.CurrentMenu = MenuType.TRAINING;
 				return true;
 			} else {
-				this.career.executeAction(selectedAction.value as any);
+				this.career.executeAction(selectedAction.action as any);
 				return true;
 			}
 		} else {
 			console.error("Invalid choice");
 			return true;
-		}
-	}
-
-	handleInput(input: string): boolean {
-		const choice = parseInt(input);
-
-		switch (this.currentMenu) {
-			case MenuType.MAIN:
-				return this.handleMainMenuInput(choice);
-
-			default:
-				return false;
 		}
 	}
 }

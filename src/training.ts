@@ -28,6 +28,9 @@ export class Training {
 		Object.entries(gains).forEach(([statName, gain]) => {
 			console.log(`${statName}: +${gain}`);
 		});
+		// TODO: roll the chance to fail a training
+		// TODO: add the new stats to the uma
+		// TODO: also handle a training failure
 	}
 
 	public trainingGains(facility: FacilityType): TrainingGains {

@@ -11,7 +11,7 @@ export enum CareerAction {
 	SKILLS = "skills",
 	RECREATION = "recreation",
 	RACES = "races",
-	BACK = 'back',
+	QUIT = "quit",
 }
 
 export interface CareerState {
@@ -19,16 +19,7 @@ export interface CareerState {
 	energy: number;
 	uma: Uma;
 	isComplete: boolean;
-	// currentMenu: MenuContext;
-	// previousMenu?: MenuContext;
 }
-
-// export enum MenuContext {
-// 	MAIN = "main",
-// 	TRAINING = "training",
-// 	SKILLS = "skills",
-// 	RACES = "races",
-// }
 
 export class Career {
 	private state: CareerState;
@@ -41,7 +32,6 @@ export class Career {
 			energy: 100,
 			uma: uma,
 			isComplete: false,
-			// currentMenu: MenuContext.MAIN,
 		};
 
 		this.training = new Training(uma);
@@ -62,7 +52,9 @@ export class Career {
 
 		if (Object.values(CareerAction).includes(action as CareerAction))
 			this.handleCareerAction(action as CareerAction);
-		else if (Object.values(TrainingAction).includes(action as TrainingAction))
+		else if (
+			Object.values(TrainingAction).includes(action as TrainingAction)
+		)
 			this.handleTrainingAction(action as TrainingAction);
 		else {
 			console.error(`Unknown action type: ${action}`);
@@ -73,15 +65,14 @@ export class Career {
 	}
 
 	private handleTrainingAction(action: TrainingAction): void {
-		console.log("Handling Trainging Action")
-		if (action === TrainingAction.BACK)
-			this.trainingBack();
-		else
-			this.training.train(action);
+		console.log("Handling Training Action");
+		if (action === TrainingAction.BACK) this.trainingBack();
+		else this.training.train(action);
 	}
 
 	private trainingBack(): void {
 		console.log("Training back");
+		// TODO: implement the new menu system to actually go back to the main menu instead of logging to the console
 	}
 
 	private handleCareerAction(action: CareerAction): void {
