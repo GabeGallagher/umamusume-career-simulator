@@ -11,6 +11,7 @@ export enum CareerAction {
 	SKILLS = "skills",
 	RECREATION = "recreation",
 	RACES = "races",
+	BACK = 'back',
 }
 
 export interface CareerState {
@@ -18,7 +19,16 @@ export interface CareerState {
 	energy: number;
 	uma: Uma;
 	isComplete: boolean;
+	// currentMenu: MenuContext;
+	// previousMenu?: MenuContext;
 }
+
+// export enum MenuContext {
+// 	MAIN = "main",
+// 	TRAINING = "training",
+// 	SKILLS = "skills",
+// 	RACES = "races",
+// }
 
 export class Career {
 	private state: CareerState;
@@ -31,6 +41,7 @@ export class Career {
 			energy: 100,
 			uma: uma,
 			isComplete: false,
+			// currentMenu: MenuContext.MAIN,
 		};
 
 		this.training = new Training(uma);
@@ -40,17 +51,11 @@ export class Career {
 		return { ...this.state };
 	}
 
-	get AvailableActions(): (CareerAction | TrainingAction)[] {
-		return [
-			CareerAction.REST,
-			CareerAction.TRAINING,
-			CareerAction.SKILLS,
-			CareerAction.RECREATION,
-			CareerAction.RACES,
-		];
+	get Training(): Training {
+		return this.training;
 	}
 
-	executeAction(action: CareerAction | TrainingAction): void {
+	public executeAction(action: CareerAction | TrainingAction): void {
 		if (this.state.isComplete) {
 			throw new Error("Career is already complete");
 		}
@@ -64,23 +69,19 @@ export class Career {
 			return;
 		}
 
-
 		this.advanceTurn();
 	}
 
 	private handleTrainingAction(action: TrainingAction): void {
+		console.log("Handling Trainging Action")
 		if (action === TrainingAction.BACK)
 			this.trainingBack();
 		else
-			this.trainStat(action);
+			this.training.train(action);
 	}
 
 	private trainingBack(): void {
-		
-	}
-	
-	private trainStat(action: TrainingAction): void {
-
+		console.log("Training back");
 	}
 
 	private handleCareerAction(action: CareerAction): void {

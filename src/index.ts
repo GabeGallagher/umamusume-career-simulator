@@ -54,7 +54,7 @@ function simulateCareer(uma: Uma): void {
 			return;
 		}
 
-		menuSystem.displayCurrentMenu();
+		menuSystem.displayMenu();
 
 		rl.question("\nSelect an action: ", (input) => {
 			const shouldContinue = menuSystem.handleInput(input)

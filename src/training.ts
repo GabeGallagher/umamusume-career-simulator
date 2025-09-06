@@ -2,6 +2,7 @@ import { Stats } from "./interfaces/stats";
 import { TrainingAction } from "./interfaces/training-action";
 import { Uma } from "./models/uma";
 
+// Facility type is tightly coupled with training actions and stats because there should never be a facility without a stat to train
 export type FacilityType = Exclude<TrainingAction, TrainingAction.BACK>;
 
 export class Training {
@@ -48,9 +49,8 @@ export class Training {
 				return this.wisdomLvl;
 			default:
 				console.error(`Unknown facility: ${facility}`);
-				break;
+				return 1;
 		}
-		return 0;
 	}
 }
 
