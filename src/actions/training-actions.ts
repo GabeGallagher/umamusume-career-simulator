@@ -3,8 +3,8 @@ import { TrainingAction } from "../interfaces/training-action";
 import { FacilityType } from "../training";
 
 export class TrainingActions implements ActionProvider {
-	getAvailableActions(): MenuAction[] {
-		const facilityActions = this.getFacilityActions();
+	public getAvailableActions(): MenuAction[] {
+		const facilityActions: FacilityType[] = this.getFacilityActions();
 
 		const actions: MenuAction[] = facilityActions.map((action, index) => {
 			return {
@@ -25,11 +25,5 @@ export class TrainingActions implements ActionProvider {
 			TrainingAction.GUTS,
 			TrainingAction.WISDOM,
 		] as FacilityType[];
-	}
-
-	private formatGains(gains: Record<string, number>): string {
-		return Object.entries(gains)
-			.map(([stat, value]) => `${stat}+${value}`)
-			.join(", ");
 	}
 }
