@@ -1,5 +1,4 @@
-import * as readline from "readline";
-import { Career, CareerAction } from "../career";
+import { Career, CareerAction, CareerState } from "../career";
 import { ActionProvider, MenuAction } from "../interfaces/action-system";
 import { MainMenuActions } from "../actions/main-menu-actions";
 import { TrainingActions } from "../actions/training-actions";
@@ -12,15 +11,13 @@ export enum MenuType {
 }
 
 export class MenuSystem {
-	private rl: readline.Interface;
 	private career: Career;
 	private currentMenu: MenuType = MenuType.MAIN;
 	private prevMenu: MenuType = MenuType.MAIN;
 	private actionProviders: Map<MenuType, ActionProvider>;
 
-	constructor(career: Career, rl: readline.Interface) {
+	constructor(career: Career) {
 		this.career = career;
-		this.rl = rl;
 		this.actionProviders = new Map([
 			[MenuType.MAIN, new MainMenuActions()],
 			[MenuType.TRAINING, new TrainingActions()],
@@ -37,7 +34,9 @@ export class MenuSystem {
 	}
 
 	get AvailableActions(): MenuAction[] {
-		const provider = this.actionProviders.get(this.currentMenu);
+		const provider: ActionProvider | undefined = this.actionProviders.get(
+			this.currentMenu
+		);
 		return provider ? provider.getAvailableActions() : [];
 	}
 
@@ -51,7 +50,7 @@ export class MenuSystem {
 	}
 
 	private displayStateInfo(): void {
-		const state = this.career.State;
+		const state: CareerState = this.career.State;
 
 		console.log(`Turn: ${state.turn}`);
 		console.log(`Energy: ${state.energy}`);
@@ -65,8 +64,8 @@ export class MenuSystem {
 	}
 
 	handleInput(input: string): boolean {
-		const choice = parseInt(input);
-		const isQuitAction = this.AvailableActions.find(
+		const choice: number = parseInt(input);
+		const isQuitAction: MenuAction | undefined = this.AvailableActions.find(
 			(action) => action.isQuit
 		);
 		if (choice === 0 && isQuitAction) {
@@ -75,8 +74,7 @@ export class MenuSystem {
 		}
 
 		if (choice < this.AvailableActions.length) {
-			const selectedAction: MenuAction =
-				this.AvailableActions[choice];
+			const selectedAction: MenuAction = this.AvailableActions[choice];
 
 			if (selectedAction.action === CareerAction.TRAINING) {
 				this.CurrentMenu = MenuType.TRAINING;

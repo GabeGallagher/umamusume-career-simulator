@@ -45,7 +45,7 @@ function simulateCareer(uma: Uma): void {
 		output: process.stdout,
 	});
 
-	const menuSystem = new MenuSystem(career, rl);
+	const menuSystem = new MenuSystem(career);
 
 	const gameLoop = (): void => {
 		if (career.isComplete) {

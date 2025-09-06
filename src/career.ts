@@ -1,7 +1,6 @@
 import { Condition } from "./enums/condition";
 import { Recreation } from "./enums/recreation";
 import { Uma } from "./models/uma";
-import { MenuSystem } from "./utils/menu-system";
 import { TrainingAction } from "./interfaces/training-action";
 import { Training } from "./training";
 

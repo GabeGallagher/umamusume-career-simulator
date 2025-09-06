@@ -82,7 +82,7 @@ export class Uma implements UmaInterface {
     }
 
 	private initConditions(): ConditionsMap {
-		const conditions = {} as ConditionsMap;
+		const conditions: ConditionsMap = {} as ConditionsMap;
 
 		Object.values(Condition).forEach((condition) => {
 			conditions[condition] = false;
@@ -100,11 +100,11 @@ export class Uma implements UmaInterface {
 		return value;
 	}
 
-    hasCondition(condition: Condition): boolean {
+    public hasCondition(condition: Condition): boolean {
         return this.conditions[condition];
     }
 
-    addCondition(condition: Condition): void {
+    public addCondition(condition: Condition): void {
         this.conditions[condition] = true;
         if (condition === Condition.PRACTICE_PERFECT)
             this.removeCondition(Condition.PRACTICE_POOR);
@@ -113,7 +113,7 @@ export class Uma implements UmaInterface {
             this.removeCondition(Condition.PRACTICE_PERFECT);
     }
 
-    removeCondition(condition: Condition): void {
+    public removeCondition(condition: Condition): void {
         this.conditions[condition] = false;
     }
 
