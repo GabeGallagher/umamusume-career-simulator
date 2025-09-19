@@ -20,7 +20,10 @@ export class MenuSystem {
 		this.career = career;
 		this.actionProviders = new Map([
 			[MenuType.MAIN, new MainMenuActions()],
-			[MenuType.TRAINING, new TrainingActions()],
+			[
+				MenuType.TRAINING,
+				new TrainingActions(career.Training, career.CurrentEnergy),
+			],
 		]);
 	}
 
@@ -37,7 +40,13 @@ export class MenuSystem {
 		const provider: ActionProvider | undefined = this.actionProviders.get(
 			this.currentMenu
 		);
-		return provider ? provider.getAvailableActions() : [];
+		if (this.currentMenu === MenuType.TRAINING) {
+			return provider
+				? provider.getAvailableActions(this.career.CurrentEnergy)
+				: [];
+		} else {
+			return provider ? provider.getAvailableActions() : [];
+		}
 	}
 
 	public displayMenu(): void {
@@ -54,7 +63,7 @@ export class MenuSystem {
 
 		console.log(`Turn: ${state.turn}`);
 		console.log(`Energy: ${state.energy}`);
-		console.log(`Mood: ${state.uma.Mood}`);
+		console.log(`Mood: ${state.mood}`);
 		console.log(`\nCurrent Stats: `);
 		console.log(`    Speed: ${state.uma.current_stats.speed}`);
 		console.log(`    Staimna: ${state.uma.current_stats.stamina}`);

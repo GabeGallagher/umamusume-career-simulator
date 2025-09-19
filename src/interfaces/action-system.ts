@@ -6,5 +6,5 @@ export interface MenuAction {
 }
 
 export interface ActionProvider {
-	getAvailableActions(): MenuAction[];
+	getAvailableActions(energy?: number): MenuAction[];
 }

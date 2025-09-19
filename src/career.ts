@@ -3,6 +3,7 @@ import { Recreation } from "./enums/recreation";
 import { Uma } from "./models/uma";
 import { TrainingAction } from "./interfaces/training-action";
 import { Training } from "./training";
+import { Mood } from "./enums/mood";
 
 export enum CareerAction {
 	REST = "rest",
@@ -16,6 +17,8 @@ export enum CareerAction {
 export interface CareerState {
 	turn: number;
 	energy: number;
+	maxEnergy: number;
+	mood: Mood;
 	uma: Uma;
 	isComplete: boolean;
 }
@@ -29,15 +32,27 @@ export class Career {
 		this.state = {
 			turn: 1,
 			energy: 100,
+			maxEnergy: 100,
+			mood: Mood.Normal,
 			uma: uma,
 			isComplete: false,
 		};
 
-		this.training = new Training(uma);
+		this.training = new Training(uma, this);
 	}
 
 	get State(): CareerState {
 		return { ...this.state };
+	}
+
+	get CurrentEnergy(): number {
+		return this.state.energy;
+	}
+
+	private setMood(moodChange: number) {
+        const newMoodValue = this.state.mood + moodChange;
+        const clampedMoodValue = Math.max(0, Math.min(Mood.Great, newMoodValue));
+        this.state.mood = clampedMoodValue as Mood;
 	}
 
 	get Training(): Training {
@@ -79,7 +94,7 @@ export class Career {
 				this.handleRest();
 				break;
 			case CareerAction.TRAINING:
-				this.handleTraining();
+				this.trainingMenuGoTo();
 				break;
 			case CareerAction.SKILLS:
 				this.handleSkills();
@@ -96,7 +111,7 @@ export class Career {
 	private handleRest(): void {
 		const addedEnergy: number = this.handleEnergyRoll(Math.random() * 100);
 		this.state.energy = Math.min(
-			this.state.uma.MaxEnergy,
+			this.state.maxEnergy,
 			this.state.energy + addedEnergy
 		);
 		console.log(
@@ -117,7 +132,7 @@ export class Career {
 		}
 	}
 
-	private handleTraining(): void {
+	private trainingMenuGoTo(): void {
 		this.state.energy = Math.max(0, this.state.energy - 20);
 		console.log(
 			`Turn ${this.state.turn}: Training (-20 energy, now ${this.state.energy})`
@@ -140,29 +155,29 @@ export class Career {
 		switch (rec) {
 			case Recreation.ShrineGreat:
 				this.addEnergy(30);
-				this.changeMood(1);
+				this.setMood(1);
 				this.rollForClawGame();
 				break;
 
 			case Recreation.ShrineGood:
 				this.addEnergy(20);
-				this.changeMood(1);
+				this.setMood(1);
 				this.rollForClawGame();
 				break;
 
 			case Recreation.ShrineNormal:
 				this.addEnergy(10);
-				this.changeMood(1);
+				this.setMood(1);
 				this.rollForClawGame();
 				break;
 
 			case Recreation.Stroll:
 				this.addEnergy(10);
-				this.changeMood(1);
+				this.setMood(1);
 				break;
 
 			case Recreation.Karaoke:
-				this.changeMood(2);
+				this.setMood(2);
 				break;
 
 			default:
@@ -175,19 +190,15 @@ export class Career {
 	private rollForClawGame(): void {
 		const roll: number = Math.floor(Math.random() * 4);
 		if (roll === 0) {
-			this.changeMood(1);
+			this.setMood(1);
 			this.addEnergy(10);
 			// TODO: Add hint for straightaway recovery
 		}
 	}
 
-	private changeMood(moodChangeAmount: number): void {
-		this.state.uma.setMood(moodChangeAmount);
-	}
-
 	private addEnergy(addedEnergy: number): void {
 		this.state.energy = Math.min(
-			this.state.uma.MaxEnergy,
+			this.state.maxEnergy,
 			this.state.energy + addedEnergy
 		);
 		console.log(

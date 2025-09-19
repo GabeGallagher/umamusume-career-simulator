@@ -20,9 +20,6 @@ export class Uma implements UmaInterface {
 	talent_group: number;
 	base_stats: Stats;
 	current_stats: Stats;
-	energy: number = 100;
-    maxEnergy: number = 100;
-	mood: Mood = Mood.Normal;
 	conditions: ConditionsMap;
 	aptitude: Aptitudes;
 	two_star_stats?: Stats;
@@ -62,24 +59,6 @@ export class Uma implements UmaInterface {
 		const rawFiveStarStats = this.requireField(rawData, "five_star_stats");
 		this.five_star_stats = this.setStats(rawFiveStarStats);
 	}
-
-    get Mood(): Mood {
-        return this.mood;
-    }
-
-    public setMood(moodChange: number): void {
-        const newMoodValue = this.mood + moodChange;
-        const clampedMoodValue = Math.max(0, Math.min(Mood.Great, newMoodValue));
-        this.mood = clampedMoodValue as Mood;
-    }
-
-    get MaxEnergy(): number {
-        return this.maxEnergy;
-    }
-
-    set MaxEnergy(increase: number) {
-        this.maxEnergy += increase;
-    }
 
 	private initConditions(): ConditionsMap {
 		const conditions: ConditionsMap = {} as ConditionsMap;
