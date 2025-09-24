@@ -1,5 +1,5 @@
 import { ActionProvider, MenuAction } from "../interfaces/action-system";
-import { TrainingAction } from "../interfaces/training-action";
+import { TrainingType } from "../enums/training-types";
 import { FacilityType, Training, TrainingGains } from "../training";
 
 export class TrainingActions implements ActionProvider {
@@ -44,19 +44,19 @@ export class TrainingActions implements ActionProvider {
 	): string {
 		let out: string = "Invalid gains or facility";
 		switch (facility) {
-			case TrainingAction.SPEED:
+			case TrainingType.SPEED:
 				out = `Speed: ${gains.speed}, Pow: ${gains.power}`;
 				break;
-			case TrainingAction.STAMINA:
+			case TrainingType.STAMINA:
 				out = `Stam: ${gains.stamina}, Guts: ${gains.guts}`;
 				break;
-			case TrainingAction.POWER:
+			case TrainingType.POWER:
 				out = `Pow: ${gains.power}, Stam: ${gains.stamina}`;
 				break;
-			case TrainingAction.GUTS:
+			case TrainingType.GUTS:
 				out = `Guts: ${gains.guts}, Speed: ${gains.speed}, Pow: ${gains.power}`;
 				break;
-			case TrainingAction.WISDOM:
+			case TrainingType.WISDOM:
 				out = `Wit: ${gains.wisdom}, Speed: ${gains.speed}`;
 				break;
 			default:
@@ -77,11 +77,11 @@ export class TrainingActions implements ActionProvider {
 
 	private getFacilityActions(): FacilityType[] {
 		return [
-			TrainingAction.SPEED,
-			TrainingAction.STAMINA,
-			TrainingAction.POWER,
-			TrainingAction.GUTS,
-			TrainingAction.WISDOM,
+			TrainingType.SPEED,
+			TrainingType.STAMINA,
+			TrainingType.POWER,
+			TrainingType.GUTS,
+			TrainingType.WISDOM,
 		] as FacilityType[];
 	}
 }
