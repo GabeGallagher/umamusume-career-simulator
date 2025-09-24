@@ -13,17 +13,15 @@ export type FacilityType = TrainingType;
 export class Training {
 	private uma: Uma;
 	private career: Career;
-	private speedLvl: number = 1;
-	private speedUsed: number = 0;
-	private staminaLvl: number = 1;
-	private staminaUsed: number = 0;
-	private powerLvl: number = 1;
-	private powerUsed: number = 0;
-	private gutsLvl: number = 1;
-	private gutsUsed: number = 0;
-	private wisdomLvl: number = 1;
-	private wisdomUsed: number = 0;
 	private failureConfig: TrainingFailureConfig;
+	
+    private facilities = {
+        [TrainingType.SPEED]: { level: 1, usageCount: 0, energyCost: -21 },
+        [TrainingType.STAMINA]: { level: 1, usageCount: 0, energyCost: -19 },
+        [TrainingType.POWER]: { level: 1, usageCount: 0, energyCost: -20 },
+        [TrainingType.GUTS]: { level: 1, usageCount: 0, energyCost: -22 },
+        [TrainingType.WISDOM]: { level: 1, usageCount: 0, energyCost: 5 }
+    };
 
 	constructor(
 		uma: Uma,
@@ -51,33 +49,35 @@ export class Training {
 			this.applyStatGains(this.trainingGains(facility));
 			let energyCost = this.getEnergyCost(facility);
 			// TODO: if uma has support that modifies energy for this specific training, modify here
+			this.updateFacilityUsage(facility);
 			this.career.addEnergy(energyCost);
 		} else {
 			console.log("Failed trainnig: handleFailure");
 		}
 	}
 
-	// Energy values are pulled from 'Calculating Training Stat Gain' section of global reference doc
-	private getEnergyCost(facility: TrainingType) {
-		switch (facility) {
-			case TrainingType.SPEED:
-				return -21;
+	private updateFacilityUsage(facility: FacilityType): void {
+		if (!this.facilities[facility])
+			throw new Error(`invalid training type: ${facility}`);
 
-			case TrainingType.STAMINA:
-				return -19;
+		this.facilities[facility].usageCount++;
+		this.levelUpFacility(facility);
+	}
 
-			case TrainingType.POWER:
-				return -20;
-
-			case TrainingType.GUTS:
-				return -22;
-
-			case TrainingType.WISDOM:
-				return 5;
-
-			default:
-				throw new Error(`Invalid training type: ${facility}`);
+	private levelUpFacility(facility: FacilityType): void {
+		const facilityData = this.facilities[facility]
+		if (facilityData.level < 5 && facilityData.usageCount === 4){
+			facilityData.level++;
+			facilityData.usageCount = 0;
 		}
+	}
+
+	// Energy values are pulled from 'Calculating Training Stat Gain' section of global reference doc
+	private getEnergyCost(facility: FacilityType): number {
+		if (!this.facilities[facility])
+			throw new Error(`invalid training type: ${facility}`);
+
+		return this.facilities[facility].energyCost;
 	}
 
 	private applyStatGains(gains: TrainingGains): void {
@@ -101,21 +101,13 @@ export class Training {
 	}
 
 	private getFacilityLevel(facility: FacilityType): number {
-		switch (facility) {
-			case TrainingType.SPEED:
-				return this.speedLvl;
-			case TrainingType.STAMINA:
-				return this.staminaLvl;
-			case TrainingType.POWER:
-				return this.powerLvl;
-			case TrainingType.GUTS:
-				return this.gutsLvl;
-			case "wisdom":
-				return this.wisdomLvl;
-			default:
-				console.error(`Unknown facility: ${facility}`);
-				return 1;
-		}
+		if (!this.facilities[facility])
+			throw new Error(`invalid training type: ${facility}`);
+
+		if (!this.facilities[facility].level)
+			throw new Error(`facility level is unassigned or undefined: ${facility}`);
+
+		return this.facilities[facility].level;
 	}
 }
 
