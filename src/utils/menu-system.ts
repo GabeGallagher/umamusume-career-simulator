@@ -22,7 +22,7 @@ export class MenuSystem {
 			[MenuType.MAIN, new MainMenuActions()],
 			[
 				MenuType.TRAINING,
-				new TrainingActions(career.Training, career.CurrentEnergy),
+				new TrainingActions(career.Training),
 			],
 		]);
 	}

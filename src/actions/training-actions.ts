@@ -4,13 +4,11 @@ import { FacilityType, Training, TrainingGains } from "../training";
 
 export class TrainingActions implements ActionProvider {
 	private training: Training;
-	private currentEnergy: number;
 
-	constructor(training: Training, currentEnergy: number = 100) {
+	constructor(training: Training) {
 		this.training = training;
-		this.currentEnergy = currentEnergy;
 	}
-	public getAvailableActions(energy?: number): MenuAction[] {
+	public getAvailableActions(): MenuAction[] {
 		const facilityActions: FacilityType[] = this.getFacilityActions();
 
 		const actions: MenuAction[] = facilityActions.map((facility, index) => {
