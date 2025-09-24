@@ -1,7 +1,7 @@
 import { Condition } from "./enums/condition";
 import { Recreation } from "./enums/recreation";
 import { Uma } from "./models/uma";
-import { TrainingAction } from "./interfaces/training-action";
+import { TrainingType } from "./enums/training-types";
 import { Training } from "./training";
 import { Mood } from "./enums/mood";
 
@@ -59,7 +59,7 @@ export class Career {
 		return this.training;
 	}
 
-	public executeAction(action: CareerAction | TrainingAction): void {
+	public executeAction(action: CareerAction | TrainingType): void {
 		if (this.state.isComplete) {
 			throw new Error("Career is already complete");
 		}
@@ -67,9 +67,9 @@ export class Career {
 		if (Object.values(CareerAction).includes(action as CareerAction))
 			this.handleCareerAction(action as CareerAction);
 		else if (
-			Object.values(TrainingAction).includes(action as TrainingAction)
+			Object.values(TrainingType).includes(action as TrainingType)
 		)
-			this.handleTrainingAction(action as TrainingAction);
+			this.handleTrainingAction(action as TrainingType);
 		else {
 			console.error(`Unknown action type: ${action}`);
 			return;
@@ -78,7 +78,7 @@ export class Career {
 		this.advanceTurn();
 	}
 
-	private handleTrainingAction(action: TrainingAction): void {
+	private handleTrainingAction(action: TrainingType): void {
 		this.training.train(action);
 	}
 

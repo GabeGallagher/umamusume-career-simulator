@@ -4,11 +4,11 @@ import {
 	TrainingFailureConfig,
 } from "./config/training-failure-config";
 import { Stats } from "./interfaces/stats";
-import { TrainingAction } from "./interfaces/training-action";
+import { TrainingType } from "./enums/training-types";
 import { Uma } from "./models/uma";
 
 // Facility type is tightly coupled with training actions and stats because there should never be a facility without a stat to train
-export type FacilityType = TrainingAction;
+export type FacilityType = TrainingType;
 
 export class Training {
 	private uma: Uma;
@@ -39,7 +39,7 @@ export class Training {
 		return this.calculateFailureRate(facility, this.career.State.energy);
 	}
 
-	public train(action: TrainingAction): void {
+	public train(action: TrainingType): void {
 		const facility: FacilityType = action as FacilityType;
 		const failureRate = this.calculateFailureRate(
 			facility,
@@ -58,21 +58,21 @@ export class Training {
 	}
 
 	// Energy values are pulled from 'Calculating Training Stat Gain' section of global reference doc
-	private getEnergyCost(facility: TrainingAction) {
+	private getEnergyCost(facility: TrainingType) {
 		switch (facility) {
-			case TrainingAction.SPEED:
+			case TrainingType.SPEED:
 				return -21;
 
-			case TrainingAction.STAMINA:
+			case TrainingType.STAMINA:
 				return -19;
 
-			case TrainingAction.POWER:
+			case TrainingType.POWER:
 				return -20;
 
-			case TrainingAction.GUTS:
+			case TrainingType.GUTS:
 				return -22;
 
-			case TrainingAction.WISDOM:
+			case TrainingType.WISDOM:
 				return 5;
 
 			default:
@@ -102,13 +102,13 @@ export class Training {
 
 	private getFacilityLevel(facility: FacilityType): number {
 		switch (facility) {
-			case TrainingAction.SPEED:
+			case TrainingType.SPEED:
 				return this.speedLvl;
-			case TrainingAction.STAMINA:
+			case TrainingType.STAMINA:
 				return this.staminaLvl;
-			case TrainingAction.POWER:
+			case TrainingType.POWER:
 				return this.powerLvl;
-			case TrainingAction.GUTS:
+			case TrainingType.GUTS:
 				return this.gutsLvl;
 			case "wisdom":
 				return this.wisdomLvl;
