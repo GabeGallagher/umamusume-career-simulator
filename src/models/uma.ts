@@ -121,7 +121,7 @@ export class Uma implements UmaInterface {
 		return {
 			speed: rawStats[0],
 			stamina: rawStats[1],
-			strength: rawStats[2],
+			power: rawStats[2],
 			guts: rawStats[3],
 			wisdom: rawStats[4],
 		};

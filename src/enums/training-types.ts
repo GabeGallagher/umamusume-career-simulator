@@ -1,4 +1,4 @@
-export enum TrainingAction {
+export enum TrainingType {
 	SPEED = "speed",
 	STAMINA = "stamina",
 	POWER = "power",

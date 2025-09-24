@@ -4,16 +4,10 @@
  * is calculated when max energy is increased, so I will need to recollect this
  * data and change these values
  * 
- * Speed = max(0, min(89, 1960/Energy - 18.5))
- * Stamina = max(0, min(86, 1860/Energy - 18))  
- * Power = max(0, min(85, 1890/Energy - 18))
- * Guts = max(0, min(89, 1980/Energy - 18.5))
- * Wit = max(0, min(41, 1320/Energy - 42))
+ * Failure Rate = max(0, min(100, Raw Number - Energy))
  */
 export interface TrainingFailureFormula {
-    coefficient: number;
-    offset: number;
-    maxFailureRate: number;
+    rawNumber: number
 }
 
 export interface TrainingFailureConfig {
@@ -22,28 +16,18 @@ export interface TrainingFailureConfig {
 
 export const DEFAULT_TRAINING_FAILURE_CONFIG: TrainingFailureConfig = {
     speed: {
-        coefficient: 1960,
-        offset: -18.5,
-        maxFailureRate: 89
+        rawNumber: 55
     },
     stamina: {
-        coefficient: 1860,
-        offset: -18,
-        maxFailureRate: 86
+        rawNumber: 53
     },
     power: {
-        coefficient: 1890,
-        offset: -18,
-        maxFailureRate: 85
+        rawNumber: 54
     },
     guts: {
-        coefficient: 1980,
-        offset: -18.5,
-        maxFailureRate: 89
+        rawNumber: 56
     },
     wisdom: {
-        coefficient: 1320,
-        offset: -42,
-        maxFailureRate: 41
+        rawNumber: 42
     }
 };

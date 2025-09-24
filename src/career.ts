@@ -79,8 +79,7 @@ export class Career {
 	}
 
 	private handleTrainingAction(action: TrainingAction): void {
-		if (action === TrainingAction.BACK) this.trainingBack();
-		else this.training.train(action);
+		this.training.train(action);
 	}
 
 	private trainingBack(): void {
@@ -196,13 +195,10 @@ export class Career {
 		}
 	}
 
-	private addEnergy(addedEnergy: number): void {
+	public addEnergy(addedEnergy: number): void {
 		this.state.energy = Math.min(
 			this.state.maxEnergy,
 			this.state.energy + addedEnergy
-		);
-		console.log(
-			`Turn ${this.state.turn}: Resting (${addedEnergy}, now ${this.state.energy})`
 		);
 	}
 

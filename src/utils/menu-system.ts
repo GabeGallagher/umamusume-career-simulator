@@ -67,29 +67,34 @@ export class MenuSystem {
 		console.log(`\nCurrent Stats: `);
 		console.log(`    Speed: ${state.uma.current_stats.speed}`);
 		console.log(`    Staimna: ${state.uma.current_stats.stamina}`);
-		console.log(`    Power: ${state.uma.current_stats.strength}`);
+		console.log(`    Power: ${state.uma.current_stats.power}`);
 		console.log(`    Guts: ${state.uma.current_stats.guts}`);
 		console.log(`    Wisdom: ${state.uma.current_stats.wisdom}`);
 	}
 
 	handleInput(input: string): boolean {
 		const choice: number = parseInt(input);
-		const isQuitAction: MenuAction | undefined = this.AvailableActions.find(
-			(action) => action.isQuit
-		);
-		if (choice === 0 && isQuitAction) {
+		const selectedAction: MenuAction = this.AvailableActions[choice];
+		const isQuitAction: boolean | undefined = selectedAction.isQuit;
+		let isBackAction: boolean | undefined;
+
+		if (isQuitAction) {
 			console.log("Goodbye!");
 			return false;
+		} else {
+			isBackAction = selectedAction.isBack;
 		}
 
-		if (choice < this.AvailableActions.length) {
-			const selectedAction: MenuAction = this.AvailableActions[choice];
-
+		if (isBackAction) {
+			this.CurrentMenu = MenuType.MAIN;
+			return true;
+		} else if (choice < this.AvailableActions.length) {
 			if (selectedAction.action === CareerAction.TRAINING) {
 				this.CurrentMenu = MenuType.TRAINING;
 				return true;
 			} else {
 				this.career.executeAction(selectedAction.action as any);
+				this.CurrentMenu = MenuType.MAIN;
 				return true;
 			}
 		} else {

@@ -8,7 +8,7 @@ import { TrainingAction } from "./interfaces/training-action";
 import { Uma } from "./models/uma";
 
 // Facility type is tightly coupled with training actions and stats because there should never be a facility without a stat to train
-export type FacilityType = Exclude<TrainingAction, TrainingAction.BACK>;
+export type FacilityType = TrainingAction;
 
 export class Training {
 	private uma: Uma;
@@ -25,7 +25,11 @@ export class Training {
 	private wisdomUsed: number = 0;
 	private failureConfig: TrainingFailureConfig;
 
-	constructor(uma: Uma, career: Career, failureConfig?: TrainingFailureConfig) {
+	constructor(
+		uma: Uma,
+		career: Career,
+		failureConfig?: TrainingFailureConfig
+	) {
 		this.uma = uma;
 		this.career = career;
 		this.failureConfig = failureConfig || DEFAULT_TRAINING_FAILURE_CONFIG;
@@ -43,10 +47,36 @@ export class Training {
 		);
 		const isSuccess = Math.random() * 100 > failureRate;
 
-		if (!isSuccess) {
+		if (isSuccess) {
 			this.applyStatGains(this.trainingGains(facility));
+			let energyCost = this.getEnergyCost(facility);
+			// TODO: if uma has support that modifies energy for this specific training, modify here
+			this.career.addEnergy(energyCost);
 		} else {
 			console.log("Failed trainnig: handleFailure");
+		}
+	}
+
+	// Energy values are pulled from 'Calculating Training Stat Gain' section of global reference doc
+	private getEnergyCost(facility: TrainingAction) {
+		switch (facility) {
+			case TrainingAction.SPEED:
+				return -21;
+
+			case TrainingAction.STAMINA:
+				return -19;
+
+			case TrainingAction.POWER:
+				return -20;
+
+			case TrainingAction.GUTS:
+				return -22;
+
+			case TrainingAction.WISDOM:
+				return 5;
+
+			default:
+				throw new Error(`Invalid training type: ${facility}`);
 		}
 	}
 
@@ -56,17 +86,13 @@ export class Training {
 		});
 	}
 
-	private calculateFailureRate(facility: FacilityType, energy: number): number {
+	private calculateFailureRate(
+		facility: FacilityType,
+		energy: number
+	): number {
 		const config = this.failureConfig[facility];
 
-		const rawFailureRate: number =
-			config.coefficient / energy + config.offset;
-		const clampedFailureRate: number = Math.max(
-			0,
-			Math.min(config.maxFailureRate, rawFailureRate)
-		);
-
-		return clampedFailureRate;
+		return Math.max(0, Math.min(100, config.rawNumber - energy));
 	}
 
 	public trainingGains(facility: FacilityType): TrainingGains {
