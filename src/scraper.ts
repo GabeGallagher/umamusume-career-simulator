@@ -76,9 +76,9 @@ async function scrapeGameTora(
 		}, parentClass);
 
 		const elementDataArray = [];
+        let count = 1;
 
 		for (const element of elementList) {
-			let count = 1;
 			if (element.href) {
 				await page.goto(element.href, { waitUntil: "networkidle2" });
 
