@@ -85,7 +85,10 @@ export class Training {
 			this.uma.current_stats[training] - 5
 		);
 
-		if (roll >= 92) this.career.addCondition(Condition.PRACTICE_POOR);
+		if (roll >= 92) {
+			this.career.addCondition(Condition.PRACTICE_POOR);
+			console.log("Acquired Practice Poor!");
+		}
 	}
 
 	private rollWorstTrainingOutcome(training: TrainingType) {
@@ -103,7 +106,10 @@ export class Training {
 			);
 		}
 
-		if (roll >= 50) this.career.addCondition(Condition.PRACTICE_POOR);
+		if (roll >= 50) {
+			this.career.addCondition(Condition.PRACTICE_POOR);
+			console.log("Acquired Practice Poor!");
+		}
 	}
 
 	private getRandomTrainingTypes(count: number): TrainingType[] {
