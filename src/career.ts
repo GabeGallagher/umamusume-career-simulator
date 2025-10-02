@@ -52,7 +52,7 @@ export class Career {
 		return this.state.energy;
 	}
 
-	private setMood(moodChange: number) {
+	public changeMood(moodChange: number) {
         const newMoodValue = this.state.mood + moodChange;
         const clampedMoodValue = Math.max(0, Math.min(Mood.Great, newMoodValue));
         this.state.mood = clampedMoodValue as Mood;
@@ -183,29 +183,29 @@ export class Career {
 		switch (rec) {
 			case Recreation.ShrineGreat:
 				this.addEnergy(30);
-				this.setMood(1);
+				this.changeMood(1);
 				this.rollForClawGame();
 				break;
 
 			case Recreation.ShrineGood:
 				this.addEnergy(20);
-				this.setMood(1);
+				this.changeMood(1);
 				this.rollForClawGame();
 				break;
 
 			case Recreation.ShrineNormal:
 				this.addEnergy(10);
-				this.setMood(1);
+				this.changeMood(1);
 				this.rollForClawGame();
 				break;
 
 			case Recreation.Stroll:
 				this.addEnergy(10);
-				this.setMood(1);
+				this.changeMood(1);
 				break;
 
 			case Recreation.Karaoke:
-				this.setMood(2);
+				this.changeMood(2);
 				break;
 
 			default:
@@ -218,7 +218,7 @@ export class Career {
 	private rollForClawGame(): void {
 		const roll: number = Math.floor(Math.random() * 4);
 		if (roll === 0) {
-			this.setMood(1);
+			this.changeMood(1);
 			this.addEnergy(10);
 			// TODO: Add hint for straightaway recovery
 		}

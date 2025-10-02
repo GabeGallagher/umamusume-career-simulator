@@ -6,6 +6,7 @@ import {
 import { Stats } from "./interfaces/stats";
 import { TrainingType } from "./enums/training-types";
 import { Uma } from "./models/uma";
+import { Condition } from "./enums/condition";
 
 // Facility type is tightly coupled with training actions and stats because there should never be a facility without a stat to train
 export type FacilityType = TrainingType;
@@ -14,14 +15,14 @@ export class Training {
 	private uma: Uma;
 	private career: Career;
 	private failureConfig: TrainingFailureConfig;
-	
-    private facilities = {
-        [TrainingType.SPEED]: { level: 1, usageCount: 0, energyCost: -21 },
-        [TrainingType.STAMINA]: { level: 1, usageCount: 0, energyCost: -19 },
-        [TrainingType.POWER]: { level: 1, usageCount: 0, energyCost: -20 },
-        [TrainingType.GUTS]: { level: 1, usageCount: 0, energyCost: -22 },
-        [TrainingType.WISDOM]: { level: 1, usageCount: 0, energyCost: 5 }
-    };
+
+	private facilities = {
+		[TrainingType.SPEED]: { level: 1, usageCount: 0, energyCost: -21 },
+		[TrainingType.STAMINA]: { level: 1, usageCount: 0, energyCost: -19 },
+		[TrainingType.POWER]: { level: 1, usageCount: 0, energyCost: -20 },
+		[TrainingType.GUTS]: { level: 1, usageCount: 0, energyCost: -22 },
+		[TrainingType.WISDOM]: { level: 1, usageCount: 0, energyCost: 5 },
+	};
 
 	constructor(
 		uma: Uma,
@@ -53,6 +54,7 @@ export class Training {
 			this.career.addEnergy(energyCost);
 		} else {
 			console.log("Failed trainnig: handleFailure");
+			this.handleTrainingFailure(failureRate, action);
 		}
 	}
 
@@ -61,10 +63,53 @@ export class Training {
 	 * The bottom option offers a small chance to improve the situation with a large
 	 * rate of failure and making it worse. Failures from the "Failed trainings that
 	 * consume energy" section in the global reference doc
-	 * @param failureRate 
+	 * @param failureRate
 	 */
-	private handleTrainingFailure(failureRate: number) {
-		
+	private handleTrainingFailure(failureRate: number, training: TrainingType) {
+		if (failureRate < 20) {
+			this.rollNormalTrainingOutcome(training);
+		} else if (failureRate >= 80) {
+			this.rollWorstTrainingOutcome(training);
+		} else {
+			const roll: number = Math.random() * 100;
+			if (roll > 30) this.rollNormalTrainingOutcome(training);
+			else this.rollWorstTrainingOutcome(training);
+		}
+	}
+
+	private rollNormalTrainingOutcome(training: TrainingType) {
+		const roll: number = Math.random() * 100;
+		this.career.changeMood(-1);
+		this.uma.current_stats[training] = Math.max(
+			1,
+			this.uma.current_stats[training] - 5
+		);
+
+		if (roll >= 92) this.career.addCondition(Condition.PRACTICE_POOR);
+	}
+
+	private rollWorstTrainingOutcome(training: TrainingType) {
+		const roll: number = Math.random() * 100;
+		this.career.changeMood(-3);
+		this.uma.current_stats[training] = Math.max(
+			1,
+			this.uma.current_stats[training] - 10
+		);
+		const statsToDrop: TrainingType[] = this.getRandomTrainingTypes(2);
+		for (const stat of statsToDrop) {
+			this.uma.current_stats[stat] = Math.max(
+				1,
+				this.uma.current_stats[training] - 10
+			);
+		}
+
+		if (roll >= 50) this.career.addCondition(Condition.PRACTICE_POOR);
+	}
+
+	private getRandomTrainingTypes(count: number): TrainingType[] {
+		const allTypes = Object.values(TrainingType);
+		const shuffled = allTypes.sort(() => Math.random() - 0.5);
+		return shuffled.slice(0, count);
 	}
 
 	private updateFacilityUsage(facility: FacilityType): void {
@@ -76,8 +121,8 @@ export class Training {
 	}
 
 	private levelUpFacility(facility: FacilityType): void {
-		const facilityData = this.facilities[facility]
-		if (facilityData.level < 5 && facilityData.usageCount === 4){
+		const facilityData = this.facilities[facility];
+		if (facilityData.level < 5 && facilityData.usageCount === 4) {
 			facilityData.level++;
 			facilityData.usageCount = 0;
 		}
@@ -116,7 +161,9 @@ export class Training {
 			throw new Error(`invalid training type: ${facility}`);
 
 		if (!this.facilities[facility].level)
-			throw new Error(`facility level is unassigned or undefined: ${facility}`);
+			throw new Error(
+				`facility level is unassigned or undefined: ${facility}`
+			);
 
 		return this.facilities[facility].level;
 	}
