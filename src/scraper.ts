@@ -25,13 +25,23 @@ async function insertIntoDatabase(
 	);
 
 	for (const data of dataArray) {
-		db.run(
-			`INSERT OR REPLACE INTO characters (id, data) VALUES (?, ?)`,
-			[data.itemData.card_id, JSON.stringify(data)],
-			(err) => {
-				if (err) console.error("Error inserting data: ", err);
-			}
-		);
+        if (data.isCharCard) {
+            db.run(
+                `INSERT OR REPLACE INTO characters (id, data) VALUES (?, ?)`,
+                [data.itemData.card_id, JSON.stringify(data)],
+                (err) => {
+                    if (err) console.error("Error inserting data: ", err);
+                }
+            );
+        } else {
+            db.run(
+                `INSERT OR REPLACE INTO supports (id, data) VALUES (?, ?)`,
+                [data.itemData.support_id, JSON.stringify(data)],
+                (err) => {
+                    if (err) console.error("Error inserting data: ", err);
+                }
+            );
+        }
 	}
 
 	db.close((err) => {
