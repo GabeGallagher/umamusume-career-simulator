@@ -56,6 +56,17 @@ export class Training {
 		}
 	}
 
+	/**
+	 * Method assumes player will always select top option when failing a training.
+	 * The bottom option offers a small chance to improve the situation with a large
+	 * rate of failure and making it worse. Failures from the "Failed trainings that
+	 * consume energy" section in the global reference doc
+	 * @param failureRate 
+	 */
+	private handleTrainingFailure(failureRate: number) {
+		
+	}
+
 	private updateFacilityUsage(facility: FacilityType): void {
 		if (!this.facilities[facility])
 			throw new Error(`invalid training type: ${facility}`);

@@ -4,6 +4,7 @@ import { Uma } from "./models/uma";
 import { TrainingType } from "./enums/training-types";
 import { Training } from "./training";
 import { Mood } from "./enums/mood";
+import { ConditionsMap } from "./interfaces/conditions";
 
 export enum CareerAction {
 	REST = "rest",
@@ -21,6 +22,7 @@ export interface CareerState {
 	mood: Mood;
 	uma: Uma;
 	isComplete: boolean;
+	conditions: ConditionsMap;
 }
 
 export class Career {
@@ -36,6 +38,7 @@ export class Career {
 			mood: Mood.Normal,
 			uma: uma,
 			isComplete: false,
+			conditions: this.initConditions(),
 		};
 
 		this.training = new Training(uma, this);
@@ -57,6 +60,32 @@ export class Career {
 
 	get Training(): Training {
 		return this.training;
+	}
+	
+	private initConditions(): ConditionsMap {
+		const conditions: ConditionsMap = {} as ConditionsMap;
+
+		Object.values(Condition).forEach((condition) => {
+			conditions[condition] = false;
+		});
+		return conditions;
+	}
+	
+	public hasCondition(condition: Condition): boolean {
+		return this.state.conditions[condition];
+	}
+
+	public addCondition(condition: Condition): void {
+		this.state.conditions[condition] = true;
+		if (condition === Condition.PRACTICE_PERFECT)
+			this.removeCondition(Condition.PRACTICE_POOR);
+
+		if (condition === Condition.PRACTICE_POOR)
+			this.removeCondition(Condition.PRACTICE_PERFECT);
+	}
+
+	public removeCondition(condition: Condition): void {
+		this.state.conditions[condition] = false;
 	}
 
 	public executeAction(action: CareerAction | TrainingType): void {
@@ -122,7 +151,7 @@ export class Career {
 	private handleEnergyRoll(roll: number): number {
 		if (roll <= 12.5) {
 			const intRoll: number = Math.floor(Math.random() * 5);
-			if (intRoll === 0) this.state.uma.addCondition(Condition.NIGHT_OWL);
+			if (intRoll === 0) this.addCondition(Condition.NIGHT_OWL);
 			return 30;
 		} else if (roll > 12.5 && roll <= 65) {
 			return 50;

@@ -4,7 +4,6 @@ import { AptitudeGrade, Aptitudes } from "../interfaces/aptitudes";
 import { StatBonuses } from "../interfaces/stat-bonuses";
 import { Stats } from "../interfaces/stats";
 import { UmaInterface } from "../interfaces/uma";
-import { ConditionsMap } from "../interfaces/conditions";
 import { Condition } from "../enums/condition";
 
 export class Uma implements UmaInterface {
@@ -20,7 +19,6 @@ export class Uma implements UmaInterface {
 	talent_group: number;
 	base_stats: Stats;
 	current_stats: Stats;
-	conditions: ConditionsMap;
 	aptitude: Aptitudes;
 	two_star_stats?: Stats;
 	three_star_stats?: Stats;
@@ -40,7 +38,6 @@ export class Uma implements UmaInterface {
 		this.talent_group = this.requireField(rawData, "talent_group");
 		this.base_stats = this.requireField(rawData, "base_stats");
 		this.current_stats = this.setStats(this.base_stats);
-		this.conditions = this.initConditions();
 
 		const rawAptitude = this.requireField(rawData, "aptitude");
 		this.aptitude = this.setAptitudes(rawAptitude);
@@ -60,15 +57,6 @@ export class Uma implements UmaInterface {
 		this.five_star_stats = this.setStats(rawFiveStarStats);
 	}
 
-	private initConditions(): ConditionsMap {
-		const conditions: ConditionsMap = {} as ConditionsMap;
-
-		Object.values(Condition).forEach((condition) => {
-			conditions[condition] = false;
-		});
-		return conditions;
-	}
-
 	private requireField(obj: any, path: string): any {
 		const value = path.split(".").reduce((o, p) => o?.[p], obj);
 		if (value === undefined) {
@@ -78,23 +66,6 @@ export class Uma implements UmaInterface {
 		}
 		return value;
 	}
-
-    public hasCondition(condition: Condition): boolean {
-        return this.conditions[condition];
-    }
-
-    public addCondition(condition: Condition): void {
-        this.conditions[condition] = true;
-        if (condition === Condition.PRACTICE_PERFECT)
-            this.removeCondition(Condition.PRACTICE_POOR);
-
-        if (condition === Condition.PRACTICE_POOR)
-            this.removeCondition(Condition.PRACTICE_PERFECT);
-    }
-
-    public removeCondition(condition: Condition): void {
-        this.conditions[condition] = false;
-    }
 
 	private setAptitudes(aptArray: string[]): Aptitudes {
 		return {
