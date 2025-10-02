@@ -48,8 +48,8 @@ async function scrapeGameTora(
 	parentClass: string
 ): Promise<any> {
 	const browser: Browser = await puppeteer.launch({
-		headless: false,
-		devtools: true,
+		headless: true,
+		devtools: false,
 		args: ["--no-sandbox", "--disable-setuid-sandbox"],
 	});
 	const url: string = `https://gametora.com/umamusume/${target}`;
@@ -78,6 +78,7 @@ async function scrapeGameTora(
 		const elementDataArray = [];
 
 		for (const element of elementList) {
+			let count = 1;
 			if (element.href) {
 				await page.goto(element.href, { waitUntil: "networkidle2" });
 
@@ -96,6 +97,10 @@ async function scrapeGameTora(
 					nextData.props.pageProps.itemData
 				) {
 					elementDataArray.push(nextData.props.pageProps);
+					console.log(
+						`Pushed: ${nextData.props.pageProps.itemData.url_name}, ${count}/${elementList.length}`
+					);
+					count++;
 				} else {
 					throw new Error(
 						`Data for ${element.text} not found in __NEXT_DATA__`
@@ -116,7 +121,7 @@ async function main() {
 	try {
 		const scrapedCharacterData = await scrapeGameTora(
 			"characters",
-			'.sc-70f2d7f-0.jaayLK'
+			".sc-70f2d7f-0.jaayLK"
 		);
 		if (scrapedCharacterData) {
 			await insertIntoDatabase(
@@ -132,7 +137,7 @@ async function main() {
 	try {
 		const scrapedSupportData = await scrapeGameTora(
 			"supports",
-			".sc-73e3e686-1.iAslZY"
+			".sc-70f2d7f-0.jaayLK"
 		);
 		if (scrapedSupportData) {
 			await insertIntoDatabase(
