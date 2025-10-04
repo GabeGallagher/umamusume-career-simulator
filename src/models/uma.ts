@@ -14,7 +14,7 @@ export class Uma implements UmaInterface {
 	skills_innate: number[];
 	skills_awakening: number[];
 	skills_event: number[];
-	skills_event_en: number[];
+	skills_event_en?: number[];
 	stat_bonus: StatBonuses;
 	talent_group: number;
 	base_stats: Stats;
@@ -33,7 +33,7 @@ export class Uma implements UmaInterface {
 		this.skills_innate = this.requireField(rawData, "skills_innate");
 		this.skills_awakening = this.requireField(rawData, "skills_awakening");
 		this.skills_event = this.requireField(rawData, "skills_event");
-		this.skills_event_en = this.requireField(rawData, "skills_event_en");
+		this.skills_event_en = this.checkOptionalField(rawData, "skills_event_en");
 		this.stat_bonus = this.requireField(rawData, "stat_bonus");
 		this.talent_group = this.requireField(rawData, "talent_group");
 		this.base_stats = this.requireField(rawData, "base_stats");
@@ -55,6 +55,11 @@ export class Uma implements UmaInterface {
 
 		const rawFiveStarStats = this.requireField(rawData, "five_star_stats");
 		this.five_star_stats = this.setStats(rawFiveStarStats);
+	}
+
+	private checkOptionalField(obj: any, path: string): any {
+		const val = path.split(".").reduce((o, p) => o?.[p], obj);
+		if (val) this.requireField(obj, path);
 	}
 
 	private requireField(obj: any, path: string): any {

@@ -12,7 +12,7 @@ export interface UmaInterface {
     skills_innate: number[];
     skills_awakening: number[];
     skills_event: number[];
-    skills_event_en: number[];
+    skills_event_en?: number[];
     stat_bonus: StatBonuses;
     talent_group: number;
     base_stats: Stats;

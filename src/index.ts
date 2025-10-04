@@ -3,38 +3,49 @@ import { Uma } from "./models/uma";
 import { Career } from "./career";
 import * as readline from "readline";
 import { MenuSystem } from "./utils/menu-system";
+import { Support } from "./models/support";
+import { resolve } from "path";
 
 console.log("Hello Uma Musume Simulator!");
 
-interface CharacterRow {
+interface DataRow {
 	id: number;
 	data: string;
 }
 
-async function loadUmaFromDb(): Promise<Uma> {
-    return new Promise((resolve, reject) => {
-        const db: sqlite3.Database = new sqlite3.Database("characters.db");
-        const sql: string = "SELECT id, data FROM characters LIMIT 1";
+interface TableInfo {
+	cid: number;
+	name: string;
+	type: string;
+	notnull: number;
+	dflt_value: any;
+	pk: number;
+}
 
-        db.get(sql, [], (err: Error | null, row: CharacterRow) => {
-            if (err) {
-                console.error(`Database query failed: ${err.message}`);
-                db.close();
-                reject(err);
-            } else {
-                try {
-                    const characterData = JSON.parse(row.data);
-                    const uma: Uma = new Uma(characterData.itemData);
-                    db.close(() => {
-                        resolve(uma);
-                    });
-                } catch (parseError) {
-                    db.close();
-                    reject(parseError);
-                }
-            }
-        });
-    });
+async function loadUmaFromDb(charId: number): Promise<Uma> {
+	return new Promise((resolve, reject) => {
+		const db: sqlite3.Database = new sqlite3.Database("career-sim.db");
+		const sql: string = `SELECT data FROM characters WHERE id = ${charId}`;
+
+		db.get(sql, [], (err: Error | null, row: DataRow) => {
+			if (err) {
+				console.error(`Database query failed: ${err.message}`);
+				db.close();
+				reject(err);
+			} else {
+				try {
+					const characterData = JSON.parse(row.data);
+					const uma: Uma = new Uma(characterData.itemData);
+					db.close(() => {
+						resolve(uma);
+					});
+				} catch (parseError) {
+					db.close();
+					reject(parseError);
+				}
+			}
+		});
+	});
 }
 
 function simulateCareer(uma: Uma): void {
@@ -57,7 +68,7 @@ function simulateCareer(uma: Uma): void {
 		menuSystem.displayMenu();
 
 		rl.question("\nSelect an action: ", (input) => {
-			const shouldContinue: boolean = menuSystem.handleInput(input)
+			const shouldContinue: boolean = menuSystem.handleInput(input);
 
 			if (shouldContinue) {
 				gameLoop();
@@ -69,8 +80,46 @@ function simulateCareer(uma: Uma): void {
 	gameLoop();
 }
 
+async function loadSupportCardsFromDb(supportsIdList: number[]): Promise<Support[]> {
+	return new Promise((resolve, reject) => {
+		const db: sqlite3.Database = new sqlite3.Database("career-sim.db");
+		const supportCardArray: Support[] = [];
+
+		for (const id of supportsIdList) {
+			const sql: string = `SELECT data FROM supports WHERE id = ${id}`;
+			db.get(sql, [], (err: Error | null, row: DataRow) => {
+				if (err) {
+					console.error(`Database query failed: ${err.message}`);
+					db.close();
+					reject(err);
+				} else {
+					try {
+						const supportData = JSON.parse(row.data);
+						supportCardArray.push(new Support(supportData));
+					} catch (parseError) {
+						db.close();
+						reject(parseError);
+					}
+				}
+			})
+		}
+		db.close();
+		resolve(supportCardArray);
+	})
+}
+
 async function main(): Promise<void> {
-	const uma: Uma = await loadUmaFromDb();
+	const uma: Uma = await loadUmaFromDb(101301); // 101301-mejiro-mcqueen base
+	// TODO: Refactor to accept card ID and level
+	const supportIdArray: number[] = [
+		20023, // Sweep Tosho speed SR
+		30028, // Kitasan Black
+		20020, // King Halo speed SR
+		30021, // Tazuna SSR Pal
+		20024, // Daitaku Helios Strength SR
+		20006, // biwa-hayahide strength SR
+	]
+	const supports: Support[] = await loadSupportCardsFromDb(supportIdArray);
 	simulateCareer(uma);
 }
 
