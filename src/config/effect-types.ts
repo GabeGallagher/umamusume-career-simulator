@@ -3,42 +3,47 @@
  * support card data with what is written on their page in game tora. Basically,
  * trust me, bro.
  */
-export const EFFECT_TYPES = {
-	1: "Friendship Bonus",
-	2: "Mood Effect",
-	3: "Speed Bonus",
-	4: "Stamina Bonus",
-	5: "Power Bonus",
-	6: "Guts Bonus",
-	7: "Wit Bonus",
-	8: "Training Effectiveness",
-	9: "Initial Speed",
-	10: "Initial Stamina",
-	11: "Initial Power",
-	12: "Initial Guts",
-	13: "Initial Wit",
-	14: "Initial Friendship Gauge",
-	15: "Race Bonus",
-	16: "Fan Bonus",
-	17: "Hint Levels",
-	18: "Hint Frequency",
-	19: "Specialty Priority",
-	20: "Unknown Effect 20",
-	21: "Unknown Effect 21",
-	22: "Unknown Effect 22",
-	23: "Unknown Effect 23",
-	24: "Unknown Effect 24",
-	25: "Event Recovery",
-	26: "Event Effectiveness",
-	27: "Failure Protection",
-	28: "Energy Cost Reduction",
-	29: "Unknown Effect 29",
-	30: "Skill Point Bonus",
-	31: "Wit Friendship Recovery",
-};
-
-export type EffectId = keyof typeof EFFECT_TYPES;
+export enum EffectType {
+    FriendshipBonus = 1,
+    MoodEffect = 2,
+    SpeedBonus = 3,
+    StaminaBonus = 4,
+    PowerBonus = 5,
+    GutsBonus = 6,
+    WitBonus = 7,
+    TrainingEffectiveness = 8,
+    InitialSpeed = 9,
+    InitialStamina = 10,
+    InitialPower = 11,
+    InitialGuts = 12,
+    InitialWit = 13,
+    InitialFriendshipGauge = 14,
+    RaceBonus = 15,
+    FanBonus = 16,
+    HintLevels = 17,
+    HintFrequency = 18,
+    SpecialtyPriority = 19,
+    UnknownEffect20 = 20,
+    UnknownEffect21 = 21,
+    UnknownEffect22 = 22,
+    UnknownEffect23 = 23,
+    UnknownEffect24 = 24,
+    EventRecovery = 25,
+    EventEffectiveness = 26,
+    FailureProtection = 27,
+    EnergyCostReduction = 28,
+    UnknownEffect29 = 29,
+    SkillPointBonus = 30,
+    WitFriendshipRecovery = 31,
+}
 
 export function getEffectName(id: number): string {
-	return EFFECT_TYPES[id as EffectId] || `Unknown Effect ${id}`;
+    if (Object.values(EffectType).includes(id as EffectType)) {
+        return EffectType[id as EffectType] as string;
+    }
+    return `Unknown Effect ${id}`;
+}
+
+export function getEffectId(effectType: EffectType): number {
+    return effectType;
 }
