@@ -5,6 +5,7 @@ import { TrainingType } from "./enums/training-types";
 import { Training } from "./training";
 import { Mood } from "./enums/mood";
 import { ConditionsMap } from "./interfaces/conditions";
+import { Support } from "./models/support";
 
 export enum CareerAction {
 	REST = "rest",
@@ -16,6 +17,7 @@ export enum CareerAction {
 }
 
 export interface CareerState {
+	supports: Support[];
 	turn: number;
 	energy: number;
 	maxEnergy: number;
@@ -30,8 +32,9 @@ export class Career {
 	private maxTurns: number = 72;
 	private training: Training;
 
-	constructor(uma: Uma) {
+	constructor(uma: Uma, supports: Support[]) {
 		this.state = {
+			supports: supports,
 			turn: 1,
 			energy: 100,
 			maxEnergy: 100,

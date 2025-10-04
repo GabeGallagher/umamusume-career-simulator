@@ -49,8 +49,8 @@ async function loadUmaFromDb(charId: number): Promise<Uma> {
 	});
 }
 
-function simulateCareer(uma: Uma): void {
-	const career: Career = new Career(uma);
+function simulateCareer(uma: Uma, supports: Support[]): void {
+	const career: Career = new Career(uma, supports);
 
 	const rl: readline.Interface = readline.createInterface({
 		input: process.stdin,
@@ -123,7 +123,7 @@ async function main(): Promise<void> {
 		{id: 20006, level: 45}, // biwa-hayahide strength SR
 	];
 	const supports: Support[] = await loadSupportCardsFromDb(supportIdArray);
-	simulateCareer(uma);
+	simulateCareer(uma, supports);
 }
 
 main();
