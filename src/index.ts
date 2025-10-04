@@ -5,6 +5,7 @@ import * as readline from "readline";
 import { MenuSystem } from "./utils/menu-system";
 import { Support } from "./models/support";
 import { resolve } from "path";
+import { SupportInterface } from "./interfaces/support";
 
 console.log("Hello Uma Musume Simulator!");
 
@@ -80,13 +81,15 @@ function simulateCareer(uma: Uma): void {
 	gameLoop();
 }
 
-async function loadSupportCardsFromDb(supportsIdList: number[]): Promise<Support[]> {
+async function loadSupportCardsFromDb(
+	supportsList: SupportInterface[]
+): Promise<Support[]> {
 	return new Promise((resolve, reject) => {
 		const db: sqlite3.Database = new sqlite3.Database("career-sim.db");
 		const supportCardArray: Support[] = [];
 
-		for (const id of supportsIdList) {
-			const sql: string = `SELECT data FROM supports WHERE id = ${id}`;
+		for (const supportCard of supportsList) {
+			const sql: string = `SELECT data FROM supports WHERE id = ${supportCard.id}`;
 			db.get(sql, [], (err: Error | null, row: DataRow) => {
 				if (err) {
 					console.error(`Database query failed: ${err.message}`);
@@ -95,30 +98,30 @@ async function loadSupportCardsFromDb(supportsIdList: number[]): Promise<Support
 				} else {
 					try {
 						const supportData = JSON.parse(row.data);
-						supportCardArray.push(new Support(supportData));
+						supportCardArray.push(new Support(supportData, supportCard.level));
 					} catch (parseError) {
 						db.close();
 						reject(parseError);
 					}
 				}
-			})
+			});
 		}
 		db.close();
 		resolve(supportCardArray);
-	})
+	});
 }
 
 async function main(): Promise<void> {
 	const uma: Uma = await loadUmaFromDb(101301); // 101301-mejiro-mcqueen base
 	// TODO: Refactor to accept card ID and level
-	const supportIdArray: number[] = [
-		20023, // Sweep Tosho speed SR
-		30028, // Kitasan Black
-		20020, // King Halo speed SR
-		30021, // Tazuna SSR Pal
-		20024, // Daitaku Helios Strength SR
-		20006, // biwa-hayahide strength SR
-	]
+	const supportIdArray: SupportInterface[] = [
+		{id: 20023, level: 45}, // Sweep Tosho speed SR
+		{id: 30028, level: 50}, // Kitasan Black
+		{id: 20020, level: 45}, // King Halo speed SR
+		{id: 30021, level: 50}, // Tazuna SSR Pal
+		{id: 20024, level: 45}, // Daitaku Helios Strength SR
+		{id: 20006, level: 45}, // biwa-hayahide strength SR
+	];
 	const supports: Support[] = await loadSupportCardsFromDb(supportIdArray);
 	simulateCareer(uma);
 }

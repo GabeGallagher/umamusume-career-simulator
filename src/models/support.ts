@@ -2,9 +2,13 @@ import { SupportInterface } from "../interfaces/support";
 
 export class Support implements SupportInterface {
     id: number;
+	level: number;
+	friendShip: number;
 
-    constructor(rawData: any) {
+    constructor(rawData: any, level: number) {
         this.id = this.requireField(rawData, "card_id");
+		this.level = level;
+		this.friendShip = this.requireField(rawData, "")
     }
 
 	private requireField(obj: any, path: string): any {
