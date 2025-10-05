@@ -1,5 +1,6 @@
 import { EffectType } from "../enums/effect-types";
 import * as EffectTypes from "../enums/effect-types";
+import { TrainingType } from "../enums/training-types";
 import { SupportInterface } from "../interfaces/support";
 
 export interface Unique {
@@ -12,20 +13,33 @@ export interface Effect {
 	value: number;
 }
 
+export interface TrainingAppearanceWeights {
+	[TrainingType.SPEED]: number;
+	[TrainingType.STAMINA]: number;
+	[TrainingType.POWER]: number;
+	[TrainingType.GUTS]: number;
+	[TrainingType.WISDOM]: number;
+	noAppearance: number;
+}
+
 export class Support implements SupportInterface {
 	id: number;
+	type: TrainingType;
 	level: number;
 	effects: Map<EffectType, number>;
-	unique?: any;
+	unique?: Unique;
 	friendShipGauge: number;
+	appearanceWeights: TrainingAppearanceWeights;
 
 	constructor(rawData: any, level: number) {
 		const eventData: any = rawData.eventData;
 		const itemData: any = rawData.itemData;
 		this.id = this.requireField(itemData, "support_id");
+		this.type = itemData.type;
 		this.level = level;
 		this.effects = this.crunchEffects(this.requireField(itemData, "effects"), itemData.unique);
 		this.friendShipGauge = this.effects.get(EffectType.InitialFriendshipGauge) || 0;
+		this.appearanceWeights = this.calculateAppearanceWeights();
 	}
 
 	private requireField(obj: any, path: string): any {
@@ -36,6 +50,8 @@ export class Support implements SupportInterface {
 		return value;
 	}
 
+	// TODO: Training Effectiveness, Friendship Bonus, and Unique Specialty Priority are
+	// Multiplicative effects. This must be handled below
 	private addUnique(unique: Unique, crunchedEffects: Map<EffectType, number>) {
 		if (unique.level <= this.level) {
 			for (const effect of unique.effects) {
@@ -83,5 +99,54 @@ export class Support implements SupportInterface {
 			}
 		}
 		return 0;
+	}
+	
+    public TrainingAppearanceWeights(): TrainingAppearanceWeights {
+        if (!this.appearanceWeights) {
+            this.appearanceWeights = this.calculateAppearanceWeights();
+        }
+        return this.appearanceWeights;
+    }
+
+	private calculateAppearanceWeights(): TrainingAppearanceWeights {
+		const weights: TrainingAppearanceWeights = {
+            [TrainingType.SPEED]: 100,
+            [TrainingType.STAMINA]: 100,
+            [TrainingType.POWER]: 100,
+            [TrainingType.GUTS]: 100,
+            [TrainingType.WISDOM]: 100,
+            noAppearance: 50,
+		};
+
+		const specialtyPriority: number = this.effects.get(EffectType.SpecialtyPriority) || 0;
+		let specialtyPriorityModifiedWeight = weights[this.type] + specialtyPriority;
+
+		// For whatever reason, specialty priority from a unique effect is multiplicative
+		// even though specialty priority from a regular effect is additive. Below logic
+		// handles that
+		if (this.unique && this.level >= this.unique.level) {
+			let uniqueSpecialtyPriority = 1;
+			for (const effect of this.unique.effects) {
+				if (effect.type === EffectType.SpecialtyPriority)
+					uniqueSpecialtyPriority += effect.value / 100;
+			}
+			specialtyPriorityModifiedWeight * uniqueSpecialtyPriority;
+		}
+
+		weights[this.type] = specialtyPriorityModifiedWeight;
+		return weights;
+	}
+
+	public TrainingWeightSum(): number {
+		let sum: number = 0;
+
+        if (!this.appearanceWeights) {
+            this.appearanceWeights = this.calculateAppearanceWeights();
+        }
+
+		for (const weight of Object.values(this.appearanceWeights)) {
+			sum += weight
+		}
+		return sum;
 	}
 }
