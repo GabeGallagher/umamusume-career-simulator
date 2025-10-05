@@ -4,7 +4,6 @@ import { Career } from "./career";
 import * as readline from "readline";
 import { MenuSystem } from "./utils/menu-system";
 import { Support } from "./models/support";
-import { resolve } from "path";
 import { SupportInterface } from "./interfaces/support";
 
 console.log("Hello Uma Musume Simulator!");
@@ -12,15 +11,6 @@ console.log("Hello Uma Musume Simulator!");
 interface DataRow {
 	id: number;
 	data: string;
-}
-
-interface TableInfo {
-	cid: number;
-	name: string;
-	type: string;
-	notnull: number;
-	dflt_value: any;
-	pk: number;
 }
 
 async function loadUmaFromDb(charId: number): Promise<Uma> {
@@ -46,6 +36,36 @@ async function loadUmaFromDb(charId: number): Promise<Uma> {
 				}
 			}
 		});
+	});
+}
+
+async function loadSupportCardsFromDb(
+	supportsList: SupportInterface[]
+): Promise<Support[]> {
+	return new Promise((resolve, reject) => {
+		const db: sqlite3.Database = new sqlite3.Database("career-sim.db");
+		const supportCardArray: Support[] = [];
+
+		for (const supportCard of supportsList) {
+			const sql: string = `SELECT data FROM supports WHERE id = ${supportCard.id}`;
+			db.get(sql, [], (err: Error | null, row: DataRow) => {
+				if (err) {
+					console.error(`Database query failed: ${err.message}`);
+					db.close();
+					reject(err);
+				} else {
+					try {
+						const supportData = JSON.parse(row.data);
+						supportCardArray.push(new Support(supportData, supportCard.level));
+					} catch (parseError) {
+						db.close();
+						reject(parseError);
+					}
+				}
+			});
+		}
+		db.close();
+		resolve(supportCardArray);
 	});
 }
 
@@ -79,36 +99,6 @@ function simulateCareer(uma: Uma, supports: Support[]): void {
 		});
 	};
 	gameLoop();
-}
-
-async function loadSupportCardsFromDb(
-	supportsList: SupportInterface[]
-): Promise<Support[]> {
-	return new Promise((resolve, reject) => {
-		const db: sqlite3.Database = new sqlite3.Database("career-sim.db");
-		const supportCardArray: Support[] = [];
-
-		for (const supportCard of supportsList) {
-			const sql: string = `SELECT data FROM supports WHERE id = ${supportCard.id}`;
-			db.get(sql, [], (err: Error | null, row: DataRow) => {
-				if (err) {
-					console.error(`Database query failed: ${err.message}`);
-					db.close();
-					reject(err);
-				} else {
-					try {
-						const supportData = JSON.parse(row.data);
-						supportCardArray.push(new Support(supportData, supportCard.level));
-					} catch (parseError) {
-						db.close();
-						reject(parseError);
-					}
-				}
-			});
-		}
-		db.close();
-		resolve(supportCardArray);
-	});
 }
 
 async function main(): Promise<void> {

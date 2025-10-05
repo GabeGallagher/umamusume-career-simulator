@@ -1,5 +1,5 @@
-import { EffectType } from "../config/effect-types";
-import * as EffectTypes from "../config/effect-types";
+import { EffectType } from "../enums/effect-types";
+import * as EffectTypes from "../enums/effect-types";
 import { SupportInterface } from "../interfaces/support";
 
 export interface Unique {
