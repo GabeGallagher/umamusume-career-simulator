@@ -24,11 +24,7 @@ export class Training {
 		[TrainingType.WISDOM]: { level: 1, usageCount: 0, energyCost: 5 },
 	};
 
-	constructor(
-		uma: Uma,
-		career: Career,
-		failureConfig?: TrainingFailureConfig
-	) {
+	constructor(uma: Uma, career: Career, failureConfig?: TrainingFailureConfig) {
 		this.uma = uma;
 		this.career = career;
 		this.failureConfig = failureConfig || DEFAULT_TRAINING_FAILURE_CONFIG;
@@ -40,10 +36,7 @@ export class Training {
 
 	public train(action: TrainingType): void {
 		const facility: FacilityType = action as FacilityType;
-		const failureRate = this.calculateFailureRate(
-			facility,
-			this.career.State.energy
-		);
+		const failureRate = this.calculateFailureRate(facility, this.career.State.energy);
 		const isSuccess = Math.random() * 100 > failureRate;
 
 		if (isSuccess) {
@@ -65,7 +58,7 @@ export class Training {
 	 * consume energy" section in the global reference doc
 	 * @param failureRate
 	 */
-	private handleTrainingFailure(failureRate: number, training: TrainingType) {
+	private handleTrainingFailure(failureRate: number, training: TrainingType): void {
 		if (failureRate < 20) {
 			this.rollNormalTrainingOutcome(training);
 		} else if (failureRate >= 80) {
@@ -77,7 +70,7 @@ export class Training {
 		}
 	}
 
-	private rollNormalTrainingOutcome(training: TrainingType) {
+	private rollNormalTrainingOutcome(training: TrainingType): void {
 		const roll: number = Math.random() * 100;
 		this.career.changeMood(-1);
 		this.uma.current_stats[training] = Math.max(
@@ -91,7 +84,7 @@ export class Training {
 		}
 	}
 
-	private rollWorstTrainingOutcome(training: TrainingType) {
+	private rollWorstTrainingOutcome(training: TrainingType): void {
 		const roll: number = Math.random() * 100;
 		this.career.changeMood(-3);
 		this.uma.current_stats[training] = Math.max(
@@ -148,10 +141,7 @@ export class Training {
 		});
 	}
 
-	private calculateFailureRate(
-		facility: FacilityType,
-		energy: number
-	): number {
+	private calculateFailureRate(facility: FacilityType, energy: number): number {
 		const config = this.failureConfig[facility];
 
 		return Math.max(0, Math.min(100, config.rawNumber - energy));
@@ -167,9 +157,7 @@ export class Training {
 			throw new Error(`invalid training type: ${facility}`);
 
 		if (!this.facilities[facility].level)
-			throw new Error(
-				`facility level is unassigned or undefined: ${facility}`
-			);
+			throw new Error(`facility level is unassigned or undefined: ${facility}`);
 
 		return this.facilities[facility].level;
 	}

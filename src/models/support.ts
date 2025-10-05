@@ -17,7 +17,7 @@ export class Support implements SupportInterface {
 	level: number;
 	effects: Map<EffectType, number>;
 	unique?: any;
-	friendShip: number;
+	friendShipGauge: number;
 
 	constructor(rawData: any, level: number) {
 		const eventData: any = rawData.eventData;
@@ -25,7 +25,7 @@ export class Support implements SupportInterface {
 		this.id = this.requireField(itemData, "support_id");
 		this.level = level;
 		this.effects = this.crunchEffects(this.requireField(itemData, "effects"), itemData.unique);
-		this.friendShip = this.effects.get(EffectType.FriendshipBonus) || 0;
+		this.friendShipGauge = this.effects.get(EffectType.InitialFriendshipGauge) || 0;
 	}
 
 	private requireField(obj: any, path: string): any {
