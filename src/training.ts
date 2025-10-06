@@ -34,15 +34,10 @@ export class Training {
 	private failureConfig: TrainingFailureConfig;
 
 	private facilities: Record<TrainingType, Facility> = {
-		[TrainingType.SPEED]: { level: 1, usageCount: 0, energyCost: -21, supports: [] },
-		[TrainingType.STAMINA]: {
-			level: 1,
-			usageCount: 0,
-			energyCost: -19,
-			supports: [],
-		},
-		[TrainingType.POWER]: { level: 1, usageCount: 0, energyCost: -20, supports: [] },
-		[TrainingType.GUTS]: { level: 1, usageCount: 0, energyCost: -22, supports: [] },
+		[TrainingType.SPEED]: { level: 1, usageCount: 0, energyCost: 21, supports: [] },
+		[TrainingType.STAMINA]: { level: 1, usageCount: 0, energyCost: 19, supports: [] },
+		[TrainingType.POWER]: { level: 1, usageCount: 0, energyCost: 20, supports: [] },
+		[TrainingType.GUTS]: { level: 1, usageCount: 0, energyCost: 22, supports: [] },
 		[TrainingType.WISDOM]: { level: 1, usageCount: 0, energyCost: 5, supports: [] },
 	};
 
@@ -177,15 +172,21 @@ export class Training {
 		if (facilityData.level < 5 && facilityData.usageCount === 4) {
 			facilityData.level++;
 			facilityData.usageCount = 0;
+			// Energy cost goes up by 1 at levels 2 and 3, and by 2 at levels 4 and 5
+			if (facilityData.level <= 3) facilityData.energyCost++;
+			else facilityData.energyCost += 2;
 		}
 	}
 
 	// Energy values are pulled from 'Calculating Training Stat Gain' section of global reference doc
-	private getEnergyCost(facility: FacilityType): number {
+	public getEnergyCost(facility: FacilityType): number {
 		if (!this.facilities[facility])
 			throw new Error(`invalid training type: ${facility}`);
 
-		return this.facilities[facility].energyCost;
+		if (facility === TrainingType.WISDOM)
+			return this.facilities[facility].energyCost
+		
+		return this.facilities[facility].energyCost * -1;
 	}
 
 	private applyStatGains(gains: TrainingGains): void {
@@ -217,21 +218,23 @@ export class Training {
 			const newGain: number =
 				this.calculateGain(gains[statName], supportBonuses) *
 				(1 + 0.05 * supports.length);
-			gains[statName] = Math.floor(this.modifyGainsWithUmaGrowth(trainingType, newGain));
+			gains[statName] = Math.floor(
+				this.modifyGainsWithUmaGrowth(trainingType, newGain)
+			);
 		}
 
 		return gains;
 	}
 
 	private modifyGainsWithUmaGrowth(trainingType: TrainingType, value: number): number {
-		return value * (1 + (this.uma.Growth(trainingType) / 100));
+		return value * (1 + this.uma.Growth(trainingType) / 100);
 	}
 
 	private calculateGain(gain: number, supportBonuses: SupportBonuses): number {
 		return (
 			(gain + supportBonuses.statBonus) *
-			(1 + (this.moodMultiplier() * (1 + supportBonuses.moodEffect))) *
-			(1 + supportBonuses.trainingBonus) * 
+			(1 + this.moodMultiplier() * (1 + supportBonuses.moodEffect)) *
+			(1 + supportBonuses.trainingBonus) *
 			supportBonuses.friendshipBonus
 		);
 	}
@@ -283,7 +286,7 @@ export class Training {
 		let friendshipBonus = 100;
 		if (support.FriendshipGauge >= 80)
 			friendshipBonus += support.Effects.get(EffectType.FriendshipBonus) || 0;
-		
+
 		return friendshipBonus / 100;
 	}
 

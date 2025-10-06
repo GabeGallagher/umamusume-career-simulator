@@ -8,7 +8,7 @@ export class TrainingActions implements ActionProvider {
 	constructor(training: Training) {
 		this.training = training;
 	}
-	
+
 	public getAvailableActions(): MenuAction[] {
 		const facilityActions: FacilityType[] = this.getFacilityActions();
 
@@ -37,26 +37,33 @@ export class TrainingActions implements ActionProvider {
 		return actions;
 	}
 
-	private getTrainingInfo(
-		gains: TrainingGains,
-		facility: FacilityType
-	): string {
+	private getTrainingInfo(gains: TrainingGains, facility: FacilityType): string {
 		let out: string = "Invalid gains or facility";
 		switch (facility) {
 			case TrainingType.SPEED:
-				out = `Speed: ${gains.speed}, Pow: ${gains.power}`;
+				out = `Speed: ${gains.speed}, Pow: ${
+					gains.power
+				}, Cost: ${this.training.getEnergyCost(facility)}`;
 				break;
 			case TrainingType.STAMINA:
-				out = `Stam: ${gains.stamina}, Guts: ${gains.guts}`;
+				out = `Stam: ${gains.stamina}, Guts: ${
+					gains.guts
+				}, Cost: ${this.training.getEnergyCost(facility)}`;
 				break;
 			case TrainingType.POWER:
-				out = `Pow: ${gains.power}, Stam: ${gains.stamina}`;
+				out = `Pow: ${gains.power}, Stam: ${
+					gains.stamina
+				}, Cost: ${this.training.getEnergyCost(facility)}`;
 				break;
 			case TrainingType.GUTS:
-				out = `Guts: ${gains.guts}, Speed: ${gains.speed}, Pow: ${gains.power}`;
+				out = `Guts: ${gains.guts}, Speed: ${gains.speed}, Pow: ${
+					gains.power
+				}, Cost: ${this.training.getEnergyCost(facility)}`;
 				break;
 			case TrainingType.WISDOM:
-				out = `Wit: ${gains.wisdom}, Speed: ${gains.speed}`;
+				out = `Wit: ${gains.wisdom}, Speed: ${
+					gains.speed
+				}, Cost: ${this.training.getEnergyCost(facility)}`;
 				break;
 			default:
 				console.log(`Unknown gains or facility`);
