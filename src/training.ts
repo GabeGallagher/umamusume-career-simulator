@@ -200,6 +200,9 @@ export class Training {
 		return Math.max(0, Math.min(100, config.rawNumber - energy));
 	}
 
+	// NOTE: I am unsure if character growth bonuses are applied before or after support bonuses
+	// will have to test, but for now it is possible we'll see results that differ from what's
+	// in game
 	public trainingGains(facility: FacilityType): TrainingGains {
 		const level: number = this.getFacilityLevel(facility);
 		let gains: TrainingGains = TRAINING_TABLE[facility][level];
