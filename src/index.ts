@@ -5,6 +5,7 @@ import * as readline from "readline";
 import { MenuSystem } from "./utils/menu-system";
 import { Support } from "./models/support";
 import { SupportInterface } from "./interfaces/support";
+import { Rarity } from "./enums/rarity";
 
 console.log("Hello Uma Musume Simulator!");
 
@@ -13,7 +14,7 @@ interface DataRow {
 	data: string;
 }
 
-async function loadUmaFromDb(charId: number): Promise<Uma> {
+async function loadUmaFromDb(charId: number, stars?: number): Promise<Uma> {
 	return new Promise((resolve, reject) => {
 		const db: sqlite3.Database = new sqlite3.Database("career-sim.db");
 		const sql: string = `SELECT data FROM characters WHERE id = ${charId}`;
@@ -26,7 +27,7 @@ async function loadUmaFromDb(charId: number): Promise<Uma> {
 			} else {
 				try {
 					const characterData = JSON.parse(row.data);
-					const uma: Uma = new Uma(characterData.itemData);
+					const uma: Uma = new Uma(characterData.itemData, stars);
 					db.close(() => {
 						resolve(uma);
 					});
@@ -105,7 +106,7 @@ function simulateCareer(uma: Uma, supports: Support[]): void {
 }
 
 async function main(): Promise<void> {
-	const uma: Uma = await loadUmaFromDb(101301); // 101301-mejiro-mcqueen base
+	const uma: Uma = await loadUmaFromDb(101301, Rarity.FourStar); // 101301-mejiro-mcqueen base
 	// TODO: Refactor to accept card ID and level
 	const supportIdArray: SupportInterface[] = [
 		{ id: 20023, level: 45 }, // Sweep Tosho speed SR

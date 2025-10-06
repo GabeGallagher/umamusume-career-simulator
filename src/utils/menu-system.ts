@@ -20,10 +20,7 @@ export class MenuSystem {
 		this.career = career;
 		this.actionProviders = new Map([
 			[MenuType.MAIN, new MainMenuActions()],
-			[
-				MenuType.TRAINING,
-				new TrainingActions(career.Training),
-			],
+			[MenuType.TRAINING, new TrainingActions(career.Training)],
 		]);
 	}
 
@@ -65,11 +62,11 @@ export class MenuSystem {
 		console.log(`Energy: ${state.energy}`);
 		console.log(`Mood: ${state.mood}`);
 		console.log(`\nCurrent Stats: `);
-		console.log(`    Speed: ${state.uma.current_stats.speed}`);
-		console.log(`    Staimna: ${state.uma.current_stats.stamina}`);
-		console.log(`    Power: ${state.uma.current_stats.power}`);
-		console.log(`    Guts: ${state.uma.current_stats.guts}`);
-		console.log(`    Wisdom: ${state.uma.current_stats.wisdom}`);
+		console.log(`    Speed: ${state.uma.CurrentStats.speed}`);
+		console.log(`    Staimna: ${state.uma.CurrentStats.stamina}`);
+		console.log(`    Power: ${state.uma.CurrentStats.power}`);
+		console.log(`    Guts: ${state.uma.CurrentStats.guts}`);
+		console.log(`    Wisdom: ${state.uma.CurrentStats.wisdom}`);
 	}
 
 	handleInput(input: string): boolean {

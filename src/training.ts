@@ -121,9 +121,9 @@ export class Training {
 	private rollNormalTrainingOutcome(training: TrainingType): void {
 		const roll: number = Math.random() * 100;
 		this.career.changeMood(-1);
-		this.uma.current_stats[training] = Math.max(
+		this.uma.CurrentStats[training] = Math.max(
 			1,
-			this.uma.current_stats[training] - 5
+			this.uma.CurrentStats[training] - 5
 		);
 
 		if (roll >= 92) {
@@ -135,15 +135,15 @@ export class Training {
 	private rollWorstTrainingOutcome(training: TrainingType): void {
 		const roll: number = Math.random() * 100;
 		this.career.changeMood(-3);
-		this.uma.current_stats[training] = Math.max(
+		this.uma.CurrentStats[training] = Math.max(
 			1,
-			this.uma.current_stats[training] - 10
+			this.uma.CurrentStats[training] - 10
 		);
 		const statsToDrop: TrainingType[] = this.getRandomTrainingTypes(2);
 		for (const stat of statsToDrop) {
-			this.uma.current_stats[stat] = Math.max(
+			this.uma.CurrentStats[stat] = Math.max(
 				1,
-				this.uma.current_stats[training] - 10
+				this.uma.CurrentStats[training] - 10
 			);
 		}
 
@@ -183,15 +183,14 @@ export class Training {
 		if (!this.facilities[facility])
 			throw new Error(`invalid training type: ${facility}`);
 
-		if (facility === TrainingType.WISDOM)
-			return this.facilities[facility].energyCost
-		
+		if (facility === TrainingType.WISDOM) return this.facilities[facility].energyCost;
+
 		return this.facilities[facility].energyCost * -1;
 	}
 
 	private applyStatGains(gains: TrainingGains): void {
 		Object.entries(gains).forEach(([statName, gain]) => {
-			(this.uma.current_stats as any)[statName] += gain;
+			(this.uma.CurrentStats as any)[statName] += gain;
 		});
 	}
 
@@ -227,7 +226,7 @@ export class Training {
 	}
 
 	private modifyGainsWithUmaGrowth(trainingType: TrainingType, value: number): number {
-		return value * (1 + this.uma.Growth(trainingType) / 100);
+		return value * (1 + this.uma.StatBonus(trainingType) / 100);
 	}
 
 	private calculateGain(gain: number, supportBonuses: SupportBonuses): number {

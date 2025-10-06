@@ -43,7 +43,7 @@ export class Career {
 			isComplete: false,
 			conditions: this.initConditions(),
 		};
-
+		uma.modifyStartingStatsWithSupports(supports);
 		this.training = new Training(uma, this);
 		this.training.placeSupports(this.state.supports);
 	}
