@@ -45,6 +45,7 @@ export class Career {
 		};
 
 		this.training = new Training(uma, this);
+		this.training.placeSupports(this.state.supports);
 	}
 
 	get State(): CareerState {
@@ -255,7 +256,10 @@ export class Career {
 		if (this.state.turn > this.maxTurns) {
 			this.state.isComplete = true;
 			console.log("Career complete!");
+			return;
 		}
+
+		this.training.placeSupports(this.state.supports);
 	}
 
 	get isComplete(): boolean {

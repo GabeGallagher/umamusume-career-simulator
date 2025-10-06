@@ -7,27 +7,80 @@ import { Stats } from "./interfaces/stats";
 import { TrainingType } from "./enums/training-types";
 import { Uma } from "./models/uma";
 import { Condition } from "./enums/condition";
+import { Support } from "./models/support";
+import { EffectType } from "./enums/effect-types";
+import { Mood } from "./enums/mood";
 
 // Facility type is tightly coupled with training actions and stats because there should never be a facility without a stat to train
 export type FacilityType = TrainingType;
+
+export interface Facility {
+	level: number;
+	usageCount: number;
+	energyCost: number;
+	supports: Support[];
+}
+
+interface SupportBonuses {
+	statBonus: number;
+	moodEffect: number;
+	trainingBonus: number;
+	friendshipBonus: number;
+}
 
 export class Training {
 	private uma: Uma;
 	private career: Career;
 	private failureConfig: TrainingFailureConfig;
 
-	private facilities = {
-		[TrainingType.SPEED]: { level: 1, usageCount: 0, energyCost: -21 },
-		[TrainingType.STAMINA]: { level: 1, usageCount: 0, energyCost: -19 },
-		[TrainingType.POWER]: { level: 1, usageCount: 0, energyCost: -20 },
-		[TrainingType.GUTS]: { level: 1, usageCount: 0, energyCost: -22 },
-		[TrainingType.WISDOM]: { level: 1, usageCount: 0, energyCost: 5 },
+	private facilities: Record<TrainingType, Facility> = {
+		[TrainingType.SPEED]: { level: 1, usageCount: 0, energyCost: -21, supports: [] },
+		[TrainingType.STAMINA]: {
+			level: 1,
+			usageCount: 0,
+			energyCost: -19,
+			supports: [],
+		},
+		[TrainingType.POWER]: { level: 1, usageCount: 0, energyCost: -20, supports: [] },
+		[TrainingType.GUTS]: { level: 1, usageCount: 0, energyCost: -22, supports: [] },
+		[TrainingType.WISDOM]: { level: 1, usageCount: 0, energyCost: 5, supports: [] },
+	};
+
+	private readonly trainingToStatBonusMap: Record<TrainingType, EffectType> = {
+		[TrainingType.SPEED]: EffectType.SpeedBonus,
+		[TrainingType.STAMINA]: EffectType.StaminaBonus,
+		[TrainingType.POWER]: EffectType.PowerBonus,
+		[TrainingType.GUTS]: EffectType.GutsBonus,
+		[TrainingType.WISDOM]: EffectType.WitBonus,
 	};
 
 	constructor(uma: Uma, career: Career, failureConfig?: TrainingFailureConfig) {
 		this.uma = uma;
 		this.career = career;
 		this.failureConfig = failureConfig || DEFAULT_TRAINING_FAILURE_CONFIG;
+	}
+
+	public placeSupports(supports: Support[]): void {
+		for (const support of supports) {
+			const placementFacility: TrainingType | null =
+				this.getRandomTrainingAppearance(support);
+
+			if (placementFacility !== null) {
+				this.facilities[placementFacility].supports.push(support);
+			}
+		}
+	}
+
+	private getRandomTrainingAppearance(support: Support): TrainingType | null {
+		const random = Math.random() * support.TrainingWeightSum;
+		let currentWeight = 0;
+
+		for (const trainingType of Object.values(TrainingType)) {
+			currentWeight += support.TrainingAppearanceWeights[trainingType];
+			if (random <= currentWeight) return trainingType;
+		}
+
+		return null;
 	}
 
 	public getFailureRate(facility: FacilityType): number {
@@ -149,7 +202,86 @@ export class Training {
 
 	public trainingGains(facility: FacilityType): TrainingGains {
 		const level: number = this.getFacilityLevel(facility);
-		return TRAINING_TABLE[facility][level];
+		let gains: TrainingGains = TRAINING_TABLE[facility][level];
+		let supports: Support[] = this.facilities[facility].supports;
+
+		for (let statName of Object.keys(gains)) {
+			const trainingType: TrainingType = statName as TrainingType;
+			const supportBonuses: SupportBonuses = this.getTotalStatBonus(
+				supports,
+				trainingType
+			);
+			const newGain: number =
+				this.calculateGain(gains[statName], supportBonuses) *
+				(1 + 0.05 * supports.length);
+			gains[statName] = Math.floor(this.modifyGainsWithUmaGrowth(trainingType, newGain));
+		}
+
+		return gains;
+	}
+
+	private modifyGainsWithUmaGrowth(trainingType: TrainingType, value: number): number {
+		return value * (1 + (this.uma.Growth(trainingType) / 100));
+	}
+
+	private calculateGain(gain: number, supportBonuses: SupportBonuses): number {
+		return (
+			(gain + supportBonuses.statBonus) *
+			(1 + (this.moodMultiplier() * (1 + supportBonuses.moodEffect))) *
+			(1 + supportBonuses.trainingBonus) * 
+			supportBonuses.friendshipBonus
+		);
+	}
+
+	private moodMultiplier(): number {
+		switch (this.career.State.mood) {
+			case Mood.Great:
+				return 0.2;
+			case Mood.Good:
+				return 0.1;
+			case Mood.Normal:
+				return 0;
+			case Mood.Bad:
+				return -0.1;
+			case Mood.Awful:
+				return -0.2;
+			default:
+				throw new Error(`Unhandled Mood: ${this.career.State.mood}`);
+		}
+	}
+
+	private getTotalStatBonus(
+		supports: Support[],
+		statName: FacilityType
+	): SupportBonuses {
+		let totalStatBonus = 0;
+		let totalMoodEffect = 0;
+		let totalTrainingBonus = 0;
+		let totalFriendshipBonus = 1;
+
+		for (const support of supports) {
+			const statBonusEffectType = this.trainingToStatBonusMap[statName];
+			totalStatBonus += support.Effects.get(statBonusEffectType) || 0;
+			totalMoodEffect += support.Effects.get(EffectType.MoodEffect) || 0;
+			totalTrainingBonus +=
+				support.Effects.get(EffectType.TrainingEffectiveness) || 0;
+			totalFriendshipBonus *= this.getFriendshipBonus(support);
+		}
+
+		return {
+			statBonus: totalStatBonus,
+			moodEffect: totalMoodEffect / 100,
+			trainingBonus: totalTrainingBonus / 100,
+			friendshipBonus: totalFriendshipBonus,
+		};
+	}
+
+	private getFriendshipBonus(support: Support): number {
+		let friendshipBonus = 100;
+		if (support.FriendshipGauge >= 80)
+			friendshipBonus += support.Effects.get(EffectType.FriendshipBonus) || 0;
+		
+		return friendshipBonus / 100;
 	}
 
 	private getFacilityLevel(facility: FacilityType): number {

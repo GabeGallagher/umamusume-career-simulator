@@ -5,6 +5,7 @@ import { StatBonuses } from "../interfaces/stat-bonuses";
 import { Stats } from "../interfaces/stats";
 import { UmaInterface } from "../interfaces/uma";
 import { Condition } from "../enums/condition";
+import { TrainingType } from "../enums/training-types";
 
 export class Uma implements UmaInterface {
 	id: number;
@@ -24,6 +25,7 @@ export class Uma implements UmaInterface {
 	three_star_stats?: Stats;
 	four_star_stats: Stats;
 	five_star_stats: Stats;
+	private growth: number[];
 
 	constructor(rawData: any) {
 		this.id = this.requireField(rawData, "card_id");
@@ -38,6 +40,7 @@ export class Uma implements UmaInterface {
 		this.talent_group = this.requireField(rawData, "talent_group");
 		this.base_stats = this.requireField(rawData, "base_stats");
 		this.current_stats = this.setStats(this.base_stats);
+		this.growth = this.requireField(rawData, "stat_bonus");
 
 		const rawAptitude = this.requireField(rawData, "aptitude");
 		this.aptitude = this.setAptitudes(rawAptitude);
@@ -55,6 +58,23 @@ export class Uma implements UmaInterface {
 
 		const rawFiveStarStats = this.requireField(rawData, "five_star_stats");
 		this.five_star_stats = this.setStats(rawFiveStarStats);
+	}
+
+	public Growth(stat: TrainingType): number {
+		switch (stat) {
+			case TrainingType.SPEED:
+				return this.growth[0];
+			case TrainingType.STAMINA:
+				return this.growth[1];
+			case TrainingType.POWER:
+				return this.growth[2];
+			case TrainingType.GUTS:
+				return this.growth[3];
+			case TrainingType.WISDOM:
+				return this.growth[4];
+			default:
+				throw new Error(`Invalid growth stat type: ${stat}`)
+		}
 	}
 
 	private checkOptionalField(obj: any, path: string): any {

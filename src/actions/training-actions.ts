@@ -8,6 +8,7 @@ export class TrainingActions implements ActionProvider {
 	constructor(training: Training) {
 		this.training = training;
 	}
+	
 	public getAvailableActions(): MenuAction[] {
 		const facilityActions: FacilityType[] = this.getFacilityActions();
 

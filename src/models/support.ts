@@ -24,12 +24,12 @@ export interface TrainingAppearanceWeights {
 
 export class Support implements SupportInterface {
 	id: number;
-	type: TrainingType;
+	private type: TrainingType;
 	level: number;
-	effects: Map<EffectType, number>;
-	unique?: Unique;
-	friendShipGauge: number;
-	appearanceWeights: TrainingAppearanceWeights;
+	private effects: Map<EffectType, number>;
+	private unique?: Unique;
+	private friendShipGauge: number;
+	private appearanceWeights: TrainingAppearanceWeights;
 
 	constructor(rawData: any, level: number) {
 		const eventData: any = rawData.eventData;
@@ -37,9 +37,25 @@ export class Support implements SupportInterface {
 		this.id = this.requireField(itemData, "support_id");
 		this.type = itemData.type;
 		this.level = level;
-		this.effects = this.crunchEffects(this.requireField(itemData, "effects"), itemData.unique);
+		this.effects = this.crunchEffects(
+			this.requireField(itemData, "effects"),
+			itemData.unique
+		);
 		this.friendShipGauge = this.effects.get(EffectType.InitialFriendshipGauge) || 0;
 		this.appearanceWeights = this.calculateAppearanceWeights();
+	}
+
+	get Effects(): Map<EffectType, number> {
+		return this.effects;
+	}
+
+	get FriendshipGauge(): number {
+		return this.friendShipGauge;
+	}
+
+	public AddFriendship(newFriendship: number): void {
+		const update: number = this.friendShipGauge + newFriendship;
+		if (update > 100) this.friendShipGauge = 100;
 	}
 
 	private requireField(obj: any, path: string): any {
@@ -49,13 +65,16 @@ export class Support implements SupportInterface {
 		}
 		return value;
 	}
-
-	// TODO: Training Effectiveness, Friendship Bonus, and Unique Specialty Priority are
-	// Multiplicative effects. This must be handled below
+	
 	private addUnique(unique: Unique, crunchedEffects: Map<EffectType, number>) {
 		if (unique.level <= this.level) {
 			for (const effect of unique.effects) {
-				if (crunchedEffects.has(effect.type)) {
+				// Unique Specialty Priority is handled differently than the rest. See
+				// calculateAppearanceWeights
+				if (
+					effect.type !== EffectType.SpecialtyPriority &&
+					crunchedEffects.has(effect.type)
+				) {
 					const currentValue = crunchedEffects.get(effect.type) || 0;
 					const addedVal: number = effect.value + currentValue;
 					crunchedEffects.set(effect.type, addedVal);
@@ -100,25 +119,26 @@ export class Support implements SupportInterface {
 		}
 		return 0;
 	}
-	
-    public TrainingAppearanceWeights(): TrainingAppearanceWeights {
-        if (!this.appearanceWeights) {
-            this.appearanceWeights = this.calculateAppearanceWeights();
-        }
-        return this.appearanceWeights;
-    }
+
+	get TrainingAppearanceWeights(): TrainingAppearanceWeights {
+		if (!this.appearanceWeights) {
+			this.appearanceWeights = this.calculateAppearanceWeights();
+		}
+		return this.appearanceWeights;
+	}
 
 	private calculateAppearanceWeights(): TrainingAppearanceWeights {
 		const weights: TrainingAppearanceWeights = {
-            [TrainingType.SPEED]: 100,
-            [TrainingType.STAMINA]: 100,
-            [TrainingType.POWER]: 100,
-            [TrainingType.GUTS]: 100,
-            [TrainingType.WISDOM]: 100,
-            noAppearance: 50,
+			[TrainingType.SPEED]: 100,
+			[TrainingType.STAMINA]: 100,
+			[TrainingType.POWER]: 100,
+			[TrainingType.GUTS]: 100,
+			[TrainingType.WISDOM]: 100,
+			noAppearance: 50,
 		};
 
-		const specialtyPriority: number = this.effects.get(EffectType.SpecialtyPriority) || 0;
+		const specialtyPriority: number =
+			this.effects.get(EffectType.SpecialtyPriority) || 0;
 		let specialtyPriorityModifiedWeight = weights[this.type] + specialtyPriority;
 
 		// For whatever reason, specialty priority from a unique effect is multiplicative
@@ -137,15 +157,15 @@ export class Support implements SupportInterface {
 		return weights;
 	}
 
-	public TrainingWeightSum(): number {
+	get TrainingWeightSum(): number {
 		let sum: number = 0;
 
-        if (!this.appearanceWeights) {
-            this.appearanceWeights = this.calculateAppearanceWeights();
-        }
+		if (!this.appearanceWeights) {
+			this.appearanceWeights = this.calculateAppearanceWeights();
+		}
 
 		for (const weight of Object.values(this.appearanceWeights)) {
-			sum += weight
+			sum += weight;
 		}
 		return sum;
 	}
