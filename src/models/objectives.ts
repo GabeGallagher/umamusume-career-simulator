@@ -12,7 +12,7 @@ export class Objective implements ObjectiveInterface {
 	private targetType: number;
 	private raceChoice: number;
 	private raceChoiceDetails: number;
-	private races: RaceInterface[];
+	private races?: RaceInterface[];
 
 	get Order(): number {
 		return this.order;
@@ -44,7 +44,7 @@ export class Objective implements ObjectiveInterface {
 	get RaceChoiceDetails(): number {
 		return this.raceChoiceDetails;
 	}
-	get Races(): RaceInterface[] {
+	get Races(): RaceInterface[] | undefined {
 		return this.races;
 	}
 
@@ -52,6 +52,10 @@ export class Objective implements ObjectiveInterface {
 		this.order = this.requireField(rawData, "order");
 		this.turn = this.requireField(rawData, "turn");
 		this.conditionType = this.requireField(rawData, "cond_type");
+		// TODO: Currently have only conditions 1 (Race) and 3 (Fan gain). The other condition types might behave differently
+		if (this.conditionType !== 1 && this.conditionType !== 3) {
+			throw new Error(`New condition type ${this.conditionType} found. Must handle`);
+		}
 		this.conditionId = this.requireField(rawData, "cond_id");
 		this.conditionVal = this.requireField(rawData, "cond_value");
 		this.conditionVal2 = this.requireField(rawData, "cond_value_2");
@@ -70,9 +74,11 @@ export class Objective implements ObjectiveInterface {
 		return value;
 	}
 
-	private setRaces(rawData: any): RaceInterface[] {
+	private setRaces(rawData: any): RaceInterface[] | undefined {
 		const races: RaceInterface[] = [];
-		const data = this.requireField(rawData, "races");
+		const data = rawData.races;
+
+		if (data === undefined) return;
 		for (const rawRace of data) {
 			const race: RaceInterface = {
 				Id: this.requireField(rawRace, "id"),
@@ -85,6 +91,7 @@ export class Objective implements ObjectiveInterface {
 				FansNeeded: this.requireField(rawRace, "fans_needed"),
 				FansGained: this.requireField(rawRace, "fans_gained"),
 			};
+			races.push(race);
 		}
 		return races;
 	}

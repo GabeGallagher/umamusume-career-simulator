@@ -11,5 +11,5 @@ export interface ObjectiveInterface {
     TargetType: number;
     RaceChoice: number;
     RaceChoiceDetails: number;
-    Races: RaceInterface[];
+    Races?: RaceInterface[];
 }
