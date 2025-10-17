@@ -1,6 +1,7 @@
 import { ActionProvider, MenuAction } from "../interfaces/action-system";
 import { TrainingType } from "../enums/training-types";
 import { FacilityType, Training, TrainingGains } from "../training";
+import { Support } from "../models/support";
 
 export class TrainingActions implements ActionProvider {
 	private training: Training;
@@ -20,7 +21,7 @@ export class TrainingActions implements ActionProvider {
 			console.log(
 				`${facility} training (${trainingInfo}) - ${failureRate.toFixed(
 					0
-				)}% failure rate`
+				)}% failure rate. Available supports: ${this.printSupprts(facility)}`
 			);
 			return {
 				action: facility,
@@ -35,6 +36,17 @@ export class TrainingActions implements ActionProvider {
 		});
 
 		return actions;
+	}
+
+	private printSupprts(facility: FacilityType): string {
+		let output: string = "";
+		const supportList: Support[] = this.training.getFacilityType(facility).supports;
+		if (supportList.length === 0) return output;
+
+		for (const support of supportList) {
+			output += `${support.Name},`;
+		}
+		return output;
 	}
 
 	private getTrainingInfo(gains: TrainingGains, facility: FacilityType): string {

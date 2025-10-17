@@ -24,6 +24,7 @@ export interface TrainingAppearanceWeights {
 
 export class Support implements SupportInterface {
 	id: number;
+	private name: string;
 	private type: TrainingType;
 	level: number;
 	private effects: Map<EffectType, number>;
@@ -35,6 +36,7 @@ export class Support implements SupportInterface {
 		const eventData: any = rawData.eventData;
 		const itemData: any = rawData.itemData;
 		this.id = this.requireField(itemData, "support_id");
+		this.name = this.requireField(itemData, "char_name");
 		this.type = itemData.type;
 		this.level = level;
 		this.effects = this.crunchEffects(
@@ -43,6 +45,10 @@ export class Support implements SupportInterface {
 		);
 		this.friendShipGauge = this.effects.get(EffectType.InitialFriendshipGauge) || 0;
 		this.appearanceWeights = this.calculateAppearanceWeights();
+	}
+
+	get Name(): string {
+		return this.name;
 	}
 
 	get Effects(): Map<EffectType, number> {

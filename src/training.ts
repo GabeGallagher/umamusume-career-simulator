@@ -55,6 +55,13 @@ export class Training {
 		this.failureConfig = failureConfig || DEFAULT_TRAINING_FAILURE_CONFIG;
 	}
 
+	public getFacilityType(trainingType: TrainingType): Facility {
+		if (!this.facilities[trainingType]) {
+			throw new Error(`Invalid facility type: ${trainingType}`);
+		}
+		return this.facilities[trainingType];
+	}
+
 	public placeSupports(supports: Support[]): void {
 		for (const support of supports) {
 			const placementFacility: TrainingType | null =
