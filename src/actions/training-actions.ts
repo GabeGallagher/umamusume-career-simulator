@@ -21,7 +21,7 @@ export class TrainingActions implements ActionProvider {
 			console.log(
 				`${facility} training (${trainingInfo}) - ${failureRate.toFixed(
 					0
-				)}% failure rate. Available supports: ${this.printSupprts(facility)}`
+				)}% failure rate.${this.printSupprts(facility)}`
 			);
 			return {
 				action: facility,
@@ -43,8 +43,11 @@ export class TrainingActions implements ActionProvider {
 		const supportList: Support[] = this.training.getFacilityType(facility).supports;
 		if (supportList.length === 0) return output;
 
+		output = " Available supports: ";
 		for (const support of supportList) {
-			output += `${support.Name},`;
+			const hasHint: boolean = support.HasHint;
+			const hintString: string = hasHint ? "[HINT]" : "";
+			output += ` ${support.Name}${hintString},`;
 		}
 		return output;
 	}

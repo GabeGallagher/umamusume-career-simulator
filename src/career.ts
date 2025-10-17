@@ -118,11 +118,6 @@ export class Career {
 		this.training.train(action);
 	}
 
-	private trainingBack(): void {
-		console.log("Training back");
-		// TODO: implement the new menu system to actually go back to the main menu instead of logging to the console
-	}
-
 	private handleCareerAction(action: CareerAction): void {
 		switch (action) {
 			case CareerAction.REST:

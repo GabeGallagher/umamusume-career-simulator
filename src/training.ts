@@ -68,6 +68,7 @@ export class Training {
 				this.getRandomTrainingAppearance(support);
 
 			if (placementFacility !== null) {
+				support.rollHint();
 				this.facilities[placementFacility].supports.push(support);
 			}
 		}
@@ -90,20 +91,36 @@ export class Training {
 	}
 
 	public train(action: TrainingType): void {
-		const facility: FacilityType = action as FacilityType;
-		const failureRate = this.calculateFailureRate(facility, this.career.State.energy);
+		const facility: Facility = this.facilities[action];
+		const failureRate = this.calculateFailureRate(action, this.career.State.energy);
 		const isSuccess = Math.random() * 100 > failureRate;
 
 		if (isSuccess) {
-			this.applyStatGains(this.trainingGains(facility));
-			let energyCost = this.getEnergyCost(facility);
+			this.applyStatGains(this.trainingGains(action));
+			let energyCost = this.getEnergyCost(action);
 			// TODO: if uma has support that modifies energy for this specific training, modify here
-			this.updateFacilityUsage(facility);
+			this.handleHint(facility.supports);
+			this.updateFacilityUsage(action);
 			this.career.addEnergy(energyCost);
 		} else {
 			console.log("Failed trainnig: handleFailure");
 			this.handleTrainingFailure(failureRate, action);
 		}
+	}
+
+	private handleHint(supports: Support[]): void {
+		if (supports.length > 0) {
+			let supportsWithHintList: Support[] = [];
+			for (const support of supports) {
+				if (support.HasHint) supportsWithHintList.push(support);
+			}
+			const roll: number = Math.floor(Math.random() * supportsWithHintList.length);
+			this.getHint(supportsWithHintList[roll]);
+		}
+	}
+
+	private getHint(support: Support): void {
+		console.log("Logic to grab support with hint works. TODO: and skill hints functionality");
 	}
 
 	/**

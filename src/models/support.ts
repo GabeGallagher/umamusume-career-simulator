@@ -31,6 +31,7 @@ export class Support implements SupportInterface {
 	private unique?: Unique;
 	private friendShipGauge: number;
 	private appearanceWeights: TrainingAppearanceWeights;
+	private hasHint: boolean = false;
 
 	constructor(rawData: any, level: number) {
 		const eventData: any = rawData.eventData;
@@ -57,6 +58,19 @@ export class Support implements SupportInterface {
 
 	get FriendshipGauge(): number {
 		return this.friendShipGauge;
+	}
+
+	get HasHint(): boolean {
+		return this.hasHint;
+	}
+
+	public rollHint(): void {
+		const baseHintRate: number = 5;
+		const hintRateModifier: number = 1 + ((this.effects.get(EffectType.HintFrequency) || 0) / 100);
+		const hintRate: number = hintRateModifier * baseHintRate;
+		const roll: number = Math.random() * 100;
+		if (roll <= hintRate) this.hasHint = true;
+		else this.hasHint = false;
 	}
 
 	public AddFriendship(newFriendship: number): void {
