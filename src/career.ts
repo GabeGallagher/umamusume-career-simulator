@@ -6,6 +6,7 @@ import { Training } from "./training";
 import { Mood } from "./enums/mood";
 import { ConditionsMap } from "./interfaces/conditions";
 import { Support } from "./models/support";
+import { Objective } from "./models/objectives";
 
 export enum CareerAction {
 	REST = "rest",
@@ -30,9 +31,10 @@ export interface CareerState {
 export class Career {
 	private state: CareerState;
 	private maxTurns: number = 72;
+	private objectives: Objective[];
 	private training: Training;
 
-	constructor(uma: Uma, supports: Support[]) {
+	constructor(uma: Uma, objectives: Objective[], supports: Support[]) {
 		this.state = {
 			supports: supports,
 			turn: 1,
@@ -44,6 +46,7 @@ export class Career {
 			conditions: this.initConditions(),
 		};
 		uma.modifyStartingStatsWithSupports(supports);
+		this.objectives = objectives;
 		this.training = new Training(uma, this);
 		this.training.placeSupports(this.state.supports);
 	}

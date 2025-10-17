@@ -6,6 +6,7 @@ import { MenuSystem } from "./utils/menu-system";
 import { Support } from "./models/support";
 import { SupportInterface } from "./interfaces/support";
 import { Rarity } from "./enums/rarity";
+import { Objective } from "./models/objectives";
 
 console.log("Hello Uma Musume Simulator!");
 
@@ -30,6 +31,35 @@ async function loadUmaFromDb(charId: number, stars?: number): Promise<Uma> {
 					const uma: Uma = new Uma(characterData.itemData, stars);
 					db.close(() => {
 						resolve(uma);
+					});
+				} catch (parseError) {
+					db.close();
+					reject(parseError);
+				}
+			}
+		});
+	});
+}
+
+async function loadObjectiveFromDb(charId: number): Promise<Objective[]> {
+	return new Promise((resolve, reject) => {
+		const db: sqlite3.Database = new sqlite3.Database("career-sim.db");
+		const sql: string = `SELECT data FROM characters WHERE id = ${charId}`;
+
+		db.get(sql, [], (err: Error | null, row: DataRow) => {
+			if (err) {
+				console.error(`Database query failed: ${err.message}`);
+				db.close();
+				reject(err);
+			} else {
+				try {
+					const characterData = JSON.parse(row.data);
+					const objectives: Objective[] = [];
+					for (const objectiveData of characterData.objectiveData) {
+						objectives.push(new Objective(objectiveData));
+					}
+					db.close(() => {
+						resolve(objectives);
 					});
 				} catch (parseError) {
 					db.close();
@@ -73,8 +103,8 @@ async function loadSupportCardsFromDb(
 	});
 }
 
-function simulateCareer(uma: Uma, supports: Support[]): void {
-	const career: Career = new Career(uma, supports);
+function simulateCareer(uma: Uma, objectives: Objective[], supports: Support[]): void {
+	const career: Career = new Career(uma, objectives, supports);
 
 	const rl: readline.Interface = readline.createInterface({
 		input: process.stdin,
@@ -107,6 +137,7 @@ function simulateCareer(uma: Uma, supports: Support[]): void {
 
 async function main(): Promise<void> {
 	const uma: Uma = await loadUmaFromDb(101301, Rarity.FourStar); // 101301-mejiro-mcqueen base
+	const objectives: Objective[] = await loadObjectiveFromDb(101301);
 	// TODO: Refactor to accept card ID and level
 	const supportIdArray: SupportInterface[] = [
 		{ id: 20023, level: 45 }, // Sweep Tosho speed SR
@@ -117,7 +148,7 @@ async function main(): Promise<void> {
 		{ id: 20006, level: 45 }, // biwa-hayahide strength SR
 	];
 	const supports: Support[] = await loadSupportCardsFromDb(supportIdArray);
-	simulateCareer(uma, supports);
+	simulateCareer(uma, objectives, supports);
 }
 
 main();
