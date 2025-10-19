@@ -236,7 +236,7 @@ export class Training {
 	// in game
 	public trainingGains(facility: FacilityType): TrainingGains {
 		const level: number = this.getFacilityLevel(facility);
-		let gains: TrainingGains = TRAINING_TABLE[facility][level];
+		let gains: TrainingGains = {...TRAINING_TABLE[facility][level]};
 		let supports: Support[] = this.facilities[facility].supports;
 
 		for (let statName of Object.keys(gains)) {
