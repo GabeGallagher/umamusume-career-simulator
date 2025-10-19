@@ -63,6 +63,7 @@ export class Training {
 	}
 
 	public placeSupports(supports: Support[]): void {
+		this.removeSupports();
 		for (const support of supports) {
 			const placementFacility: TrainingType | null =
 				this.getRandomTrainingAppearance(support);
@@ -71,6 +72,12 @@ export class Training {
 				support.rollHint();
 				this.facilities[placementFacility].supports.push(support);
 			}
+		}
+	}
+
+	private removeSupports(): void {
+		for (const trainingType of Object.values(TrainingType)) {
+			this.facilities[trainingType].supports = [];
 		}
 	}
 
