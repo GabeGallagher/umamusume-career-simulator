@@ -1,5 +1,6 @@
 import { EffectType } from "../enums/effect-types";
 import * as EffectTypes from "../enums/effect-types";
+import { SupportType } from "../enums/support-type";
 import { TrainingType } from "../enums/training-types";
 import { SupportInterface } from "../interfaces/support";
 
@@ -25,7 +26,7 @@ export interface TrainingAppearanceWeights {
 export class Support implements SupportInterface {
 	id: number;
 	private name: string;
-	private type: TrainingType;
+	private type: SupportType;
 	level: number;
 	private effects: Map<EffectType, number>;
 	private unique?: Unique;
@@ -157,23 +158,26 @@ export class Support implements SupportInterface {
 			noAppearance: 50,
 		};
 
-		const specialtyPriority: number =
-			this.effects.get(EffectType.SpecialtyPriority) || 0;
-		let specialtyPriorityModifiedWeight = weights[this.type] + specialtyPriority;
+		// Friend supports currently do not have a training type and typically do not modify
+		// appearence weight
+		if (this.type !== SupportType.FRIEND) {
+			const specialtyPriority: number =
+				this.effects.get(EffectType.SpecialtyPriority) || 0;
+			let specialtyPriorityModifiedWeight = weights[this.type] + specialtyPriority;
 
-		// For whatever reason, specialty priority from a unique effect is multiplicative
-		// even though specialty priority from a regular effect is additive. Below logic
-		// handles that
-		if (this.unique && this.level >= this.unique.level) {
-			let uniqueSpecialtyPriority = 1;
-			for (const effect of this.unique.effects) {
-				if (effect.type === EffectType.SpecialtyPriority)
-					uniqueSpecialtyPriority += effect.value / 100;
+			// For whatever reason, specialty priority from a unique effect is multiplicative
+			// even though specialty priority from a regular effect is additive. Below logic
+			// handles that
+			if (this.unique && this.level >= this.unique.level) {
+				let uniqueSpecialtyPriority = 1;
+				for (const effect of this.unique.effects) {
+					if (effect.type === EffectType.SpecialtyPriority)
+						uniqueSpecialtyPriority += effect.value / 100;
+				}
+				specialtyPriorityModifiedWeight * uniqueSpecialtyPriority;
 			}
-			specialtyPriorityModifiedWeight * uniqueSpecialtyPriority;
+			weights[this.type] = specialtyPriorityModifiedWeight;
 		}
-
-		weights[this.type] = specialtyPriorityModifiedWeight;
 		return weights;
 	}
 
