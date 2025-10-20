@@ -117,7 +117,6 @@ export class Training {
 		if (isSuccess) {
 			this.applyStatGains(this.trainingGains(action));
 			let energyCost = this.getEnergyCost(action);
-			// TODO: if uma has support that modifies energy for this specific training, modify here
 			this.handleHint(facility.supports);
 			this.updateFacilityUsage(action);
 			this.career.addEnergy(energyCost);
@@ -126,6 +125,8 @@ export class Training {
 			this.handleTrainingFailure(failureRate, action);
 		}
 	}
+
+
 
 	private handleHint(supports: Support[]): void {
 		if (supports.length > 0) {
@@ -138,8 +139,16 @@ export class Training {
 		}
 	}
 
+	/**
+	 * This function currently just applies the bonus friendship gauge from hint training and rolls
+	 * to see if uma gets the hint for raw stats
+	 * @param support 
+	 */
 	private getHint(support: Support): void {
-		console.log("Logic to grab support with hint works. TODO: and skill hints functionality");
+		support.AddFriendship(5);
+		const roll: number = Math.floor(Math.random() * (support.HintSkills.length + 1));
+		if (roll === 0)
+			this.applyStatGains(SUPPORT_HINT_STAT_TABLE[support.Type as FacilityType]);
 	}
 
 	/**
@@ -430,3 +439,15 @@ export const TRAINING_TABLE: TrainingTable = {
 		5: { wisdom: 13, speed: 4 },
 	},
 };
+
+export type HintGainTable = {
+	[type in FacilityType]: TrainingGains;
+}
+
+export const SUPPORT_HINT_STAT_TABLE: HintGainTable = {
+	speed: { speed: 6, power: 2},
+	stamina: { stamina: 6, guts: 2},
+	power: { stamina: 2, power: 6},
+	guts: { speed: 1, power: 1, guts: 6 },
+	wisdom: { wisdom: 6 }
+}

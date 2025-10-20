@@ -32,6 +32,7 @@ export class Support implements SupportInterface {
 	private unique?: Unique;
 	private friendShipGauge: number;
 	private appearanceWeights: TrainingAppearanceWeights;
+	private hintSkills: number[];
 	private hasHint: boolean = false;
 
 	constructor(rawData: any, level: number) {
@@ -47,6 +48,7 @@ export class Support implements SupportInterface {
 		);
 		this.friendShipGauge = this.effects.get(EffectType.InitialFriendshipGauge) || 0;
 		this.appearanceWeights = this.calculateAppearanceWeights();
+		this.hintSkills = this.getHintSkills(itemData);
 	}
 
 	get Name(): string {
@@ -69,13 +71,24 @@ export class Support implements SupportInterface {
 		return this.type;
 	}
 
+	get HintSkills(): number[] {
+		return this.hintSkills;
+	}
+
+	private getHintSkills(itemData: any): number[] {
+		const hints: any = this.requireField(itemData, "hints");
+		return hints.hint_skills;
+	}
+
 	public rollHint(): void {
-		const baseHintRate: number = 5;
-		const hintRateModifier: number = 1 + ((this.effects.get(EffectType.HintFrequency) || 0) / 100);
-		const hintRate: number = hintRateModifier * baseHintRate;
-		const roll: number = Math.random() * 100;
-		if (roll <= hintRate) this.hasHint = true;
-		else this.hasHint = false;
+		if (this.type !== SupportType.FRIEND) {
+			const baseHintRate: number = 5;
+			const hintRateModifier: number = 1 + ((this.effects.get(EffectType.HintFrequency) || 0) / 100);
+			const hintRate: number = hintRateModifier * baseHintRate;
+			const roll: number = Math.random() * 100;
+			if (roll <= hintRate) this.hasHint = true;
+			else this.hasHint = false;
+		}
 	}
 
 	public AddFriendship(newFriendship: number): void {
