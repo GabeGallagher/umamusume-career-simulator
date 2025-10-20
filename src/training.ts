@@ -10,6 +10,7 @@ import { Condition } from "./enums/condition";
 import { Support } from "./models/support";
 import { EffectType } from "./enums/effect-types";
 import { Mood } from "./enums/mood";
+import { SupportType } from "./enums/support-type";
 
 // Facility type is tightly coupled with training actions and stats because there should never be a facility without a stat to train
 export type FacilityType = TrainingType;
@@ -95,6 +96,17 @@ export class Training {
 
 	public getFailureRate(facility: FacilityType): number {
 		return this.calculateFailureRate(facility, this.career.State.energy);
+	}
+
+	private facilityHasFriendSupport(facility: FacilityType): boolean {
+		const supports: Support[] = this.facilities[facility].supports;
+		let output: boolean = false;
+
+		for (const support of supports) {
+			if (support.Type === SupportType.FRIEND)
+				output = true;
+		}
+		return output
 	}
 
 	public train(action: TrainingType): void {
@@ -214,9 +226,27 @@ export class Training {
 		if (!this.facilities[facility])
 			throw new Error(`invalid training type: ${facility}`);
 
-		if (facility === TrainingType.WISDOM) return this.facilities[facility].energyCost;
+		let energyCost: number = this.facilities[facility].energyCost;
+		let energyCostModifier: number = -100;
 
-		return this.facilities[facility].energyCost * -1;
+		// Wit is not modified by cost reduction since it gives energy
+		if (facility === TrainingType.WISDOM) return energyCost;
+
+		if (this.facilityHasFriendSupport(facility)) {
+			const supports: Support[] = this.facilities[facility].supports;
+			const friendSupports: Support[] = [];
+
+			for (const support of supports) {
+				if (support.Type === SupportType.FRIEND)
+					friendSupports.push(support);
+			}
+
+			for (const support of friendSupports) {
+				energyCostModifier += support.Effects.get(EffectType.EnergyCostReduction) || 0;
+			}
+		}
+		energyCostModifier /= 100;
+		return Math.floor(energyCost * energyCostModifier);
 	}
 
 	private applyStatGains(gains: TrainingGains): void {
@@ -227,14 +257,34 @@ export class Training {
 
 	private calculateFailureRate(facility: FacilityType, energy: number): number {
 		const config = this.failureConfig[facility];
+		let failureRate: number = Math.max(0, Math.min(100, config.rawNumber - energy));
 
-		return Math.max(0, Math.min(100, config.rawNumber - energy));
+		if (this.facilityHasFriendSupport(facility)) {
+			const supports: Support[] = this.facilities[facility].supports;
+			const friendSupports: Support[] = [];
+
+			for (const support of supports) {
+				if (support.Type === SupportType.FRIEND)
+					friendSupports.push(support);
+			}
+			let failureModifier: number = 100;
+
+			for (const support of friendSupports) {
+				failureModifier -= support.Effects.get(EffectType.FailureProtection) || 0;
+			}
+			failureModifier /= 100;
+			failureRate *= failureModifier;
+		}
+		return Math.floor(failureRate);
 	}
 
 	// NOTE: I am unsure if character growth bonuses are applied before or after support bonuses
 	// will have to test, but for now it is possible we'll see results that differ from what's
 	// in game
 	public trainingGains(facility: FacilityType): TrainingGains {
+		if (!this.facilities[facility])
+			throw new Error(`invalid training type: ${facility}`);
+
 		const level: number = this.getFacilityLevel(facility);
 		let gains: TrainingGains = {...TRAINING_TABLE[facility][level]};
 		let supports: Support[] = this.facilities[facility].supports;

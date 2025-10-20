@@ -65,6 +65,10 @@ export class Support implements SupportInterface {
 		return this.hasHint;
 	}
 
+	get Type(): SupportType {
+		return this.type;
+	}
+
 	public rollHint(): void {
 		const baseHintRate: number = 5;
 		const hintRateModifier: number = 1 + ((this.effects.get(EffectType.HintFrequency) || 0) / 100);
